@@ -151,3 +151,39 @@ export const candidateHighlights = [
   "Short role summary with proof of experience",
   "Ready-now status for urgent requirements",
 ];
+
+
+export const profileSections = [
+  { label: "Primary role", value: "Waiter / Front Desk" },
+  { label: "Expected pay", value: "$20/hr" },
+  { label: "Availability", value: "Evening / Weekend" },
+  { label: "Travel radius", value: "Up to 6 miles" },
+];
+
+export const roleCards = [
+  {
+    title: "Waiter",
+    note: "Dining service, billing, table support",
+  },
+  {
+    title: "Receptionist",
+    note: "Front desk, calls, scheduling",
+  },
+  {
+    title: "Cashier",
+    note: "Customer handling, POS, shift coverage",
+  },
+];
+
+export const workHistory = [
+  {
+    place: "Blue Plate Cafe",
+    role: "Service Associate",
+    duration: "2023 to Present",
+  },
+  {
+    place: "Townline Bistro",
+    role: "Waitstaff",
+    duration: "2021 to 2023",
+  },
+];
