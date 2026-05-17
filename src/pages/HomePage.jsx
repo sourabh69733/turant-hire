@@ -254,10 +254,35 @@ const useCases = [
   { title: "High-volume Teams", text: "Hire more people, faster.",                    Icon: GroupIcon },
 ];
 
+import { useState } from "react";
+
 /* ── Page ─────────────────────────────────────────────────────────── */
 export default function HomePage() {
+  const [showModal, setShowModal] = useState(false);
+
+  const handleComingSoon = (e) => {
+    e.preventDefault();
+    setShowModal(true);
+  };
+
   return (
     <div className="turant-landing">
+      {/* COMING SOON MODAL */}
+      {showModal && (
+        <div className="th-modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="th-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="th-modal-icon">
+              <BoltIcon size={32} color="#ffc347" />
+            </div>
+            <h3>Coming Soon!</h3>
+            <p>We are currently building this feature. Stay tuned!</p>
+            <button className="th-btn th-btn-primary" onClick={() => setShowModal(false)}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* NAVBAR */}
       <header className="th-navbar">
         <div className="th-navbar-inner">
@@ -269,7 +294,7 @@ export default function HomePage() {
             <a href="#login">Login</a>
           </nav>
 
-          <a className="th-nav-cta" href="#contact">
+          <a className="th-nav-cta" href="#contact" onClick={handleComingSoon}>
             Start Hiring
           </a>
         </div>
@@ -290,10 +315,10 @@ export default function HomePage() {
             </p>
 
             <div className="th-hero-actions">
-              <a className="th-btn th-btn-primary" href="#contact">
+              <a className="th-btn th-btn-primary" href="#contact" onClick={handleComingSoon}>
                 Start Hiring <ArrowRight />
               </a>
-              <a className="th-btn th-btn-secondary" href="/candidate">
+              <a className="th-btn th-btn-secondary" href="/candidate" onClick={handleComingSoon}>
                 Join as Candidate <ArrowRight />
               </a>
             </div>
@@ -350,7 +375,7 @@ export default function HomePage() {
           </div>
 
           <div className="th-centered-cta">
-            <a className="th-btn th-btn-primary" href="#contact">
+            <a className="th-btn th-btn-primary" href="#contact" onClick={handleComingSoon}>
               Post your requirement <ArrowRight />
             </a>
           </div>
@@ -385,7 +410,7 @@ export default function HomePage() {
               <h2 className="th-cta-title">Need to hire someone urgently?</h2>
               <p className="th-cta-sub">Start with one requirement. We'll help you find ready candidates faster.</p>
             </div>
-            <a className="th-btn th-btn-primary th-btn-lg" href="/">
+            <a className="th-btn th-btn-primary th-btn-lg" href="/" onClick={handleComingSoon}>
               Start Hiring <ArrowRight />
             </a>
             <div className="th-cta-bolt" aria-hidden="true">
