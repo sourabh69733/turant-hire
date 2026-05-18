@@ -1,0 +1,14 @@
+{
+  "name": "auth-ui",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./styles.css": "./src/styles.css"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.8",
+    "react": "^18.3.1"
+  }
+}
