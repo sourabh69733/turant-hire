@@ -307,7 +307,6 @@ export default function HomePage() {
           <nav className="th-nav">
             <a href="#companies">For Companies</a>
             <a href="#candidates">Candidates</a>
-            <a href={appUrls.employer}>Login</a>
           </nav>
 
           <a className="th-nav-cta" href={appUrls.employer}>
