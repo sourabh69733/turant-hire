@@ -24,6 +24,12 @@ python3 -m venv .venv
 .venv/bin/pip install -e services/api
 ```
 
+Or, after the virtualenv exists:
+
+```bash
+npm run api:install
+```
+
 ## Configure
 
 Copy the example env file and fill in your Supabase project values:
@@ -40,7 +46,13 @@ connection string and keep all keys in `.env`, not in source files.
 From the repo root:
 
 ```bash
-.venv/bin/uvicorn app.main:app --app-dir services/api --reload
+npm run api
+```
+
+Or:
+
+```bash
+./scripts/run-api.sh
 ```
 
 ## Current API
@@ -56,3 +68,8 @@ From the repo root:
 - The rest of the backend does not need to know whether the database is local
   Postgres or Supabase Postgres. Only `DATABASE_URL` changes.
 - Supabase-specific API keys are kept optional until we add Auth or Storage.
+- Run migrations before starting against a fresh database:
+
+```bash
+npm run api:migrate
+```
