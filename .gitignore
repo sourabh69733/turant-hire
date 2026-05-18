@@ -3,4 +3,5 @@ node_modules
 .env
 .venv
 turant_hire.db
+client_secret_*.json
 __pycache__

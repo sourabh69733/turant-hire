@@ -3,11 +3,17 @@
   "private": true,
   "version": "0.1.0",
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "dev": "npm run dev --workspace web",
     "build": "npm run build --workspace web",
-    "preview": "npm run preview --workspace web"
+    "preview": "npm run preview --workspace web",
+    "candidate": "npm run dev --workspace candidate",
+    "employer": "npm run dev --workspace employer",
+    "api": "./scripts/run-api.sh",
+    "api:install": ".venv/bin/pip install -e services/api",
+    "api:migrate": ".venv/bin/alembic -c services/api/alembic.ini upgrade head"
   }
 }
