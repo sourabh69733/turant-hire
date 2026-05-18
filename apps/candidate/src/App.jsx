@@ -9,6 +9,7 @@ import {
   updateCandidateAvailability,
   updateCandidateProfile,
 } from "./lib/candidateApi";
+import { ensureAppUser } from "./lib/userApi";
 import "./candidate.css";
 
 export default function App() {
@@ -54,10 +55,16 @@ export default function App() {
       setError("");
 
       try {
+        await ensureAppUser({
+          auth_user_id: session.user.id,
+          email: session.user.email ?? "",
+          role: "candidate",
+        });
         const nextProfile = await getCandidateProfileByAuthUserId(session.user.id);
         setProfile(nextProfile);
       } catch (nextError) {
         setProfile(null);
+        setError(nextError.message);
       } finally {
         setIsBooting(false);
       }
