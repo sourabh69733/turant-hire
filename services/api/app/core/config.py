@@ -8,6 +8,12 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     api_prefix: str = "/api"
     debug: bool = True
+    allowed_origins: list[str] = [
+        "http://127.0.0.1:4174",
+        "http://127.0.0.1:4175",
+        "http://localhost:4174",
+        "http://localhost:4175",
+    ]
     database_url: str = "postgresql+psycopg://postgres:password@db.project-ref.supabase.co:5432/postgres"
     supabase_url: str | None = None
     supabase_anon_key: str | None = None
