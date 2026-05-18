@@ -1,0 +1,225 @@
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(255, 196, 77, 0.16), transparent 24%),
+    linear-gradient(180deg, #f8fafc 0%, #edf3ff 100%);
+  color: #0f172a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.candidate-shell {
+  width: min(1100px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 36px 0 60px;
+}
+
+.candidate-panel {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+}
+
+.candidate-hero-panel {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 30px;
+}
+
+.candidate-hero-panel h1 {
+  margin: 10px 0 10px;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  line-height: 0.95;
+}
+
+.candidate-kicker {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2563eb;
+}
+
+.candidate-progress-card,
+.candidate-status-card {
+  min-width: 240px;
+  display: grid;
+  gap: 6px;
+  padding: 20px;
+  border-radius: 20px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.candidate-status-card.is-ready {
+  background: #ecfdf3;
+  border-color: #86efac;
+}
+
+.candidate-form,
+.candidate-form-inline {
+  display: grid;
+  gap: 26px;
+  margin-top: 20px;
+  padding: 28px;
+}
+
+.candidate-form-section {
+  display: grid;
+  gap: 18px;
+}
+
+.candidate-section-head h2 {
+  margin: 6px 0 0;
+  font-size: 1.35rem;
+}
+
+.candidate-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.candidate-form label,
+.candidate-form-inline label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.94rem;
+  font-weight: 600;
+}
+
+.candidate-form input,
+.candidate-form select,
+.candidate-form textarea,
+.candidate-form-inline input,
+.candidate-form-inline select,
+.candidate-form-inline textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font: inherit;
+}
+
+.candidate-form textarea,
+.candidate-form-inline textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.candidate-toggle {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.candidate-toggle input {
+  width: 18px;
+  min-height: 18px;
+}
+
+.candidate-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.candidate-actions-right {
+  justify-content: flex-end;
+  padding-top: 18px;
+}
+
+.candidate-actions-spread {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.candidate-button,
+.candidate-link {
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.candidate-button {
+  min-height: 48px;
+  padding: 0 18px;
+  background: #ffc347;
+  color: #111827;
+  font-weight: 800;
+}
+
+.candidate-button-secondary {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+.candidate-link {
+  background: transparent;
+  color: #2563eb;
+  font-weight: 700;
+  padding: 0;
+}
+
+.candidate-summary-grid {
+  margin-top: 20px;
+  align-items: stretch;
+}
+
+.candidate-summary-grid > .candidate-panel {
+  padding: 24px;
+}
+
+.candidate-detail-list {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.candidate-detail-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.candidate-detail-list span,
+.candidate-summary {
+  color: #475569;
+}
+
+.candidate-banner {
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+@media (max-width: 860px) {
+  .candidate-hero-panel,
+  .candidate-grid,
+  .candidate-summary-grid {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .candidate-progress-card,
+  .candidate-status-card {
+    min-width: 0;
+  }
+}
