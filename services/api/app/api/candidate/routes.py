@@ -38,6 +38,19 @@ def get_candidate_profile(
     return profile
 
 
+@router.get("/profiles/by-auth/{auth_user_id}", response_model=CandidateProfileRead)
+def get_candidate_profile_by_auth_user_id(
+    auth_user_id: str,
+    session: Session = Depends(get_db_session),
+) -> CandidateProfileRead:
+    print('[get_candidate_profile_by_auth_user_id] auth_user_id, profile', auth_user_id)
+    service = get_candidate_service(session)
+    profile = service.get_profile_by_auth_user_id(auth_user_id)
+    if profile is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Candidate not found")
+    return profile
+
+
 @router.put("/profiles/{candidate_id}", response_model=CandidateProfileRead)
 def update_candidate_profile(
     candidate_id: str,

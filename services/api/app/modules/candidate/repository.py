@@ -10,6 +10,9 @@ class CandidateRepository:
     def get_profile(self, candidate_id: str) -> CandidateProfile | None:
         return self.store.get(CandidateProfile, id=candidate_id)
 
+    def get_profile_by_auth_user_id(self, auth_user_id: str) -> CandidateProfile | None:
+        return self.store.get(CandidateProfile, auth_user_id=auth_user_id)
+
     def create_profile(self, payload: CandidateProfileCreate) -> CandidateProfile:
         return self.store.create(CandidateProfile, data=payload.model_dump())
 

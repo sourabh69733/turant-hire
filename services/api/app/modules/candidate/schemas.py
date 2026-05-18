@@ -4,6 +4,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class CandidateProfileBase(BaseModel):
+    auth_user_id: str = Field(min_length=3, max_length=128)
+    email: str = Field(min_length=5, max_length=255)
     full_name: str = Field(min_length=2, max_length=120)
     phone: str = Field(min_length=8, max_length=24)
     primary_role: str = Field(min_length=2, max_length=120)

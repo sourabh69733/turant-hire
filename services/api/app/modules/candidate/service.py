@@ -21,6 +21,12 @@ class CandidateService:
             return None
         return CandidateProfileRead.model_validate(profile)
 
+    def get_profile_by_auth_user_id(self, auth_user_id: str) -> CandidateProfileRead | None:
+        profile = self.repository.get_profile_by_auth_user_id(auth_user_id)
+        if profile is None:
+            return None
+        return CandidateProfileRead.model_validate(profile)
+
     def update_profile(
         self,
         candidate_id: str,
