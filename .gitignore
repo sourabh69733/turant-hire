@@ -1,3 +1,6 @@
 dist
 node_modules
 .env
+.venv
+turant_hire.db
+__pycache__
