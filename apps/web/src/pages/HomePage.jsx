@@ -1,3 +1,18 @@
+function getAppUrls() {
+  const isLocalHost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+
+  return {
+    candidate:
+      import.meta.env.VITE_CANDIDATE_APP_URL ??
+      (isLocalHost ? "http://127.0.0.1:4174" : "https://talent.turanthire.com"),
+    employer:
+      import.meta.env.VITE_EMPLOYER_APP_URL ??
+      (isLocalHost ? "http://127.0.0.1:4175" : "https://employer.turanthire.com"),
+  };
+}
+
 /* ── SVG Icon helpers ─────────────────────────────────────────────── */
 function BoltIcon({ size = 24, color = "#ffc347" }) {
   return (
@@ -259,6 +274,7 @@ import { useState } from "react";
 /* ── Page ─────────────────────────────────────────────────────────── */
 export default function HomePage() {
   const [showModal, setShowModal] = useState(false);
+  const appUrls = getAppUrls();
 
   const handleComingSoon = (e) => {
     e.preventDefault();
@@ -291,10 +307,10 @@ export default function HomePage() {
           <nav className="th-nav">
             <a href="#companies">For Companies</a>
             <a href="#candidates">Candidates</a>
-            <a href="#login">Login</a>
+            <a href={appUrls.employer}>Login</a>
           </nav>
 
-          <a className="th-nav-cta" href="#contact" onClick={handleComingSoon}>
+          <a className="th-nav-cta" href={appUrls.employer}>
             Start Hiring
           </a>
         </div>
@@ -315,10 +331,10 @@ export default function HomePage() {
             </p>
 
             <div className="th-hero-actions">
-              <a className="th-btn th-btn-primary" href="#contact" onClick={handleComingSoon}>
+              <a className="th-btn th-btn-primary" href={appUrls.employer}>
                 Start Hiring <ArrowRight />
               </a>
-              <a className="th-btn th-btn-secondary" href="/candidate" onClick={handleComingSoon}>
+              <a className="th-btn th-btn-secondary" href={appUrls.candidate}>
                 Join as Candidate <ArrowRight />
               </a>
             </div>
@@ -375,7 +391,7 @@ export default function HomePage() {
           </div>
 
           <div className="th-centered-cta">
-            <a className="th-btn th-btn-primary" href="#contact" onClick={handleComingSoon}>
+            <a className="th-btn th-btn-primary" href={appUrls.employer}>
               Post your requirement <ArrowRight />
             </a>
           </div>
@@ -410,7 +426,7 @@ export default function HomePage() {
               <h2 className="th-cta-title">Need to hire someone urgently?</h2>
               <p className="th-cta-sub">Start with one requirement. We'll help you find ready candidates faster.</p>
             </div>
-            <a className="th-btn th-btn-primary th-btn-lg" href="/" onClick={handleComingSoon}>
+            <a className="th-btn th-btn-primary th-btn-lg" href={appUrls.employer}>
               Start Hiring <ArrowRight />
             </a>
             <div className="th-cta-bolt" aria-hidden="true">
@@ -430,8 +446,8 @@ export default function HomePage() {
             </div>
 
             <nav className="th-footer-links">
-              <a href="#companies">For Companies</a>
-              <a href="#candidates">Candidates</a>
+              <a href={appUrls.employer}>For Companies</a>
+              <a href={appUrls.candidate}>Candidates</a>
               <a href="#about">About Us</a>
               <a href="#contact">Contact Us</a>
               <a href="#privacy">Privacy Policy</a>
