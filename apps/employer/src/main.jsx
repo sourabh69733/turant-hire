@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 
 import App from "./App";
 import "auth-ui/styles.css";
+import "./employer.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
