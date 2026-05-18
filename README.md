@@ -22,6 +22,25 @@ npm install
 npm run dev
 ```
 
+## Auth apps
+
+Candidate auth app:
+
+```bash
+npm run candidate
+```
+
+Employer auth app:
+
+```bash
+npm run employer
+```
+
+Each app needs:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
 The root scripts currently point to `apps/web`, which contains the existing
 implemented version of the site.
 
@@ -37,5 +56,17 @@ python3 -m venv .venv
 Run the FastAPI service:
 
 ```bash
-.venv/bin/uvicorn app.main:app --app-dir services/api --reload
+npm run api
+```
+
+Or directly:
+
+```bash
+./scripts/run-api.sh
+```
+
+Run DB migrations:
+
+```bash
+npm run api:migrate
 ```
