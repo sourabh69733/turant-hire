@@ -19,6 +19,7 @@ export default function App() {
   const [isBooting, setIsBooting] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+  const [isRoleBlocked, setIsRoleBlocked] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -35,6 +36,8 @@ export default function App() {
       setSession(nextSession);
       if (!nextSession) {
         setProfile(null);
+        setIsRoleBlocked(false);
+        setError("");
         return;
       }
     });
@@ -53,6 +56,7 @@ export default function App() {
 
       setIsBooting(true);
       setError("");
+      setIsRoleBlocked(false);
 
       try {
         await ensureAppUser({
@@ -65,6 +69,7 @@ export default function App() {
       } catch (nextError) {
         setProfile(null);
         setError(nextError.message);
+        setIsRoleBlocked(nextError.message.toLowerCase().includes("already registered as"));
       } finally {
         setIsBooting(false);
       }
@@ -170,13 +175,23 @@ export default function App() {
           onSignOut={handleSignOut}
           profile={profile}
         />
-      ) : (
+      ) : !isRoleBlocked ? (
         <CandidateOnboarding
           authUserId={session.user.id}
           initialEmail={session.user.email ?? ""}
           isSaving={isSaving}
           onSave={handleCreateProfile}
         />
+      ) : (
+        <div className="candidate-shell">
+          <div className="candidate-panel candidate-hero-panel">
+            <div>
+              <span className="candidate-kicker">Account role</span>
+              <h1>This Google account cannot open the candidate app.</h1>
+              <p>{error}</p>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

@@ -1,9 +1,12 @@
-import { useState } from "react";
-
-const availabilityOptions = ["Today", "Tomorrow", "This week", "Weekends only"];
+import React, { useEffect, useState } from "react";
+import { CandidateSidebar } from "./CandidateSidebar";
+import { MobileBottomNav } from "./MobileBottomNav";
+import { DashboardView } from "./DashboardView";
+import { ProfileView } from "./ProfileView";
+import { AvailabilityModal } from "./AvailabilityModal";
 
 export function CandidateDashboard({ profile, onProfileSave, onAvailabilitySave, onSignOut, isSaving }) {
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const [isEditingAvailability, setIsEditingAvailability] = useState(false);
   const [profileDraft, setProfileDraft] = useState({
     full_name: profile.full_name,
@@ -17,155 +20,118 @@ export function CandidateDashboard({ profile, onProfileSave, onAvailabilitySave,
     is_ready_now: profile.is_ready_now,
   });
 
-  function saveProfile(event) {
-    event.preventDefault();
-    onProfileSave(profileDraft).then(() => setIsEditingProfile(false));
-  }
+  useEffect(() => {
+    setProfileDraft({
+      full_name: profile.full_name,
+      primary_role: profile.primary_role,
+      location: profile.location,
+      expected_pay: profile.expected_pay,
+      profile_summary: profile.profile_summary,
+    });
+    setAvailabilityDraft({
+      availability: profile.availability,
+      is_ready_now: profile.is_ready_now,
+    });
+  }, [profile]);
 
-  function saveAvailability(event) {
+  const initials = profile.full_name
+    .split(" ")
+    .map((item) => item[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const handleProfileSave = (event) => {
+    event.preventDefault();
+    onProfileSave(profileDraft);
+  };
+
+  const handleAvailabilitySave = (event) => {
     event.preventDefault();
     onAvailabilitySave(availabilityDraft).then(() => setIsEditingAvailability(false));
-  }
+  };
+
+  const handleTabChange = (nextTab) => {
+    if (nextTab === "availability") {
+      setIsEditingAvailability(true);
+      return;
+    }
+    setActiveTab(nextTab);
+  };
 
   return (
-    <div className="candidate-shell">
-      <section className="candidate-panel candidate-hero-panel">
-        <div>
-          <span className="candidate-kicker">Profile overview</span>
-          <h1>{profile.full_name}</h1>
-          <p>{profile.primary_role} in {profile.location}</p>
-        </div>
-        <div className={`candidate-status-card ${profile.is_ready_now ? "is-ready" : ""}`}>
-          <strong>{profile.is_ready_now ? "Ready now" : "Not ready now"}</strong>
-          <span>{profile.availability}</span>
-        </div>
-      </section>
+    <div className="candidate-v2">
+      <div className="cv2-container">
+        {/* Desktop Sidebar */}
+        <CandidateSidebar activeTab={activeTab} setActiveTab={handleTabChange} onSignOut={onSignOut} />
 
-      <section className="candidate-grid candidate-summary-grid">
-        <article className="candidate-panel">
-          <div className="candidate-section-head">
-            <span className="candidate-kicker">Core details</span>
-            <h2>Match basics</h2>
-          </div>
-          <div className="candidate-detail-list">
-            <div><span>Phone</span><strong>{profile.phone}</strong></div>
-            <div><span>Expected pay</span><strong>{profile.expected_pay}</strong></div>
-            <div><span>Availability</span><strong>{profile.availability}</strong></div>
-            <div><span>Email</span><strong>{profile.email}</strong></div>
-          </div>
-          <button className="candidate-link" onClick={() => setIsEditingProfile((value) => !value)} type="button">
-            {isEditingProfile ? "Close profile edit" : "Edit profile"}
-          </button>
-        </article>
+        {/* Main Content Area */}
+        <main className="cv2-main">
+          {/* Header */}
+          <header className="cv2-header">
+            {/* Mobile Brand (hidden on desktop) */}
+            <div className="cv2-header-brand cv2-mobile-only">
+              <svg className="cv2-header-brand-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+              TurantHire
+            </div>
 
-        <article className="candidate-panel">
-          <div className="candidate-section-head">
-            <span className="candidate-kicker">Readiness</span>
-            <h2>Quick availability</h2>
-          </div>
-          <p className="candidate-summary">{profile.profile_summary || "Add a short summary to improve matching quality."}</p>
-          <button className="candidate-button candidate-button-secondary" onClick={() => setIsEditingAvailability((value) => !value)} type="button">
-            {isEditingAvailability ? "Close availability edit" : "Update availability"}
-          </button>
-        </article>
-      </section>
+            {/* Action Items */}
+            <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+              <button className="cv2-header-icon" type="button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                  <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                </svg>
+              </button>
 
-      {isEditingProfile ? (
-        <form className="candidate-panel candidate-form-inline" onSubmit={saveProfile}>
-          <div className="candidate-section-head">
-            <span className="candidate-kicker">Edit profile</span>
-            <h2>Update your match details</h2>
-          </div>
-          <div className="candidate-grid">
-            <label>
-              Full name
-              <input
-                onChange={(event) => setProfileDraft((current) => ({ ...current, full_name: event.target.value }))}
-                value={profileDraft.full_name}
-              />
-            </label>
-            <label>
-              Primary role
-              <input
-                onChange={(event) => setProfileDraft((current) => ({ ...current, primary_role: event.target.value }))}
-                value={profileDraft.primary_role}
-              />
-            </label>
-            <label>
-              Location
-              <input
-                onChange={(event) => setProfileDraft((current) => ({ ...current, location: event.target.value }))}
-                value={profileDraft.location}
-              />
-            </label>
-            <label>
-              Expected pay
-              <input
-                onChange={(event) => setProfileDraft((current) => ({ ...current, expected_pay: event.target.value }))}
-                value={profileDraft.expected_pay}
-              />
-            </label>
-          </div>
-          <label>
-            Summary
-            <textarea
-              onChange={(event) => setProfileDraft((current) => ({ ...current, profile_summary: event.target.value }))}
-              rows="4"
-              value={profileDraft.profile_summary}
+              <button className="cv2-header-profile" style={{ border: "none", background: "transparent", padding: 0 }} type="button">
+                <div className="cv2-avatar-sm" style={{ display: 'grid', placeItems: 'center', background: 'linear-gradient(180deg, #dbe2ea 0%, #bfc8d4 100%)', color: '#1f2937', fontWeight: 800 }}>
+                  {initials}
+                </div>
+                <span className="cv2-header-name">{profile.full_name}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--c-text-muted)" }}>
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            </div>
+          </header>
+
+          {/* Tab Content */}
+          {activeTab === "overview" && (
+            <DashboardView
+              profile={profile}
+              setActiveTab={handleTabChange}
+              openAvailabilityModal={() => setIsEditingAvailability(true)}
             />
-          </label>
-          <div className="candidate-actions">
-            <button className="candidate-button" disabled={isSaving} type="submit">
-              {isSaving ? "Saving..." : "Save profile changes"}
-            </button>
-          </div>
-        </form>
-      ) : null}
+          )}
 
-      {isEditingAvailability ? (
-        <form className="candidate-panel candidate-form-inline" onSubmit={saveAvailability}>
-          <div className="candidate-section-head">
-            <span className="candidate-kicker">Availability</span>
-            <h2>Keep your status fresh</h2>
-          </div>
-          <div className="candidate-grid">
-            <label>
-              Availability
-              <select
-                onChange={(event) => setAvailabilityDraft((current) => ({ ...current, availability: event.target.value }))}
-                value={availabilityDraft.availability}
-              >
-                {availabilityOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="candidate-toggle">
-              <span>Ready now</span>
-              <input
-                checked={availabilityDraft.is_ready_now}
-                onChange={(event) => setAvailabilityDraft((current) => ({ ...current, is_ready_now: event.target.checked }))}
-                type="checkbox"
-              />
-            </label>
-          </div>
-          <div className="candidate-actions candidate-actions-spread">
-            <button className="candidate-button" disabled={isSaving} type="submit">
-              {isSaving ? "Saving..." : "Save availability"}
-            </button>
-            <button className="candidate-link" onClick={onSignOut} type="button">
-              Sign out
-            </button>
-          </div>
-        </form>
-      ) : (
-        <div className="candidate-actions candidate-actions-right">
-          <button className="candidate-link" onClick={onSignOut} type="button">
-            Sign out
-          </button>
-        </div>
+          {activeTab === "profile" && (
+            <ProfileView
+              profile={profile}
+              profileDraft={profileDraft}
+              setProfileDraft={setProfileDraft}
+              saveProfile={handleProfileSave}
+              isSaving={isSaving}
+              setActiveTab={handleTabChange}
+            />
+          )}
+        </main>
+      </div>
+
+      {/* Mobile Navigation */}
+      <MobileBottomNav activeTab={activeTab} setActiveTab={handleTabChange} />
+
+      {/* Modals */}
+      {isEditingAvailability && (
+        <AvailabilityModal
+          availabilityDraft={availabilityDraft}
+          setAvailabilityDraft={setAvailabilityDraft}
+          saveAvailability={handleAvailabilitySave}
+          isSaving={isSaving}
+          onClose={() => setIsEditingAvailability(false)}
+        />
       )}
     </div>
   );
