@@ -68,6 +68,31 @@ export function MobileBottomNav({ activeTab, setActiveTab }) {
         </>
       ),
     },
+    {
+      id: "messages",
+      label: "Messages",
+      icon: (
+        <path
+          d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          stroke="currentColor"
+        />
+      ),
+    },
+    {
+      id: "settings",
+      label: "More",
+      icon: (
+        <>
+          <circle cx="5" cy="12" r="1.6" fill="currentColor" />
+          <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+          <circle cx="19" cy="12" r="1.6" fill="currentColor" />
+        </>
+      ),
+    },
   ];
 
   return (

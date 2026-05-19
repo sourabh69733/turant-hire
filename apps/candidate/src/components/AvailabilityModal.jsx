@@ -1,4 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
+
+const availabilityOptions = [
+  {
+    value: "Immediately",
+    label: "Immediately",
+    description: "Available to start right away",
+  },
+  {
+    value: "Within 1 Week",
+    label: "Within 1 Week",
+    description: "Best for near-term roles",
+  },
+  {
+    value: "Within 2 Weeks",
+    label: "Within 2 Weeks",
+    description: "Useful for scheduled joining",
+  },
+  {
+    value: "Custom Date",
+    label: "Custom Date",
+    description: "Choose a specific date",
+  },
+];
+
+const shiftOptions = ["Any Shift", "Day Shift", "Night Shift", "Flexible"];
 
 export function AvailabilityModal({
   availabilityDraft,
@@ -7,24 +32,52 @@ export function AvailabilityModal({
   isSaving,
   onClose,
 }) {
-  const availabilityOptions = [
-    "Immediately",
-    "Within 1 Week",
-    "Within 2 Weeks",
-  ];
+  const [selectedShift, setSelectedShift] = useState("Any Shift");
+  const [customDate, setCustomDate] = useState("");
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    saveAvailability(e);
-  };
+  const selectedAvailability = availabilityOptions.some((option) => option.value === availabilityDraft.availability)
+    ? availabilityDraft.availability
+    : "Custom Date";
+
+  const displayAvailability = selectedAvailability === "Custom Date" && customDate
+    ? customDate
+    : availabilityDraft.availability;
+
+  function handleAvailabilityChange(nextValue) {
+    if (nextValue === "Custom Date") {
+      setAvailabilityDraft((current) => ({
+        ...current,
+        availability: customDate || "Custom Date",
+      }));
+      return;
+    }
+
+    setAvailabilityDraft((current) => ({
+      ...current,
+      availability: nextValue,
+    }));
+  }
+
+  function handleCustomDateChange(nextValue) {
+    setCustomDate(nextValue);
+    setAvailabilityDraft((current) => ({
+      ...current,
+      availability: nextValue || "Custom Date",
+    }));
+  }
+
+  function handleSave(event) {
+    event.preventDefault();
+    saveAvailability(event);
+  }
 
   return (
     <div className="cv2-modal-overlay" onClick={onClose}>
-      <form className="cv2-modal" onClick={(e) => e.stopPropagation()} onSubmit={handleSave}>
+      <form className="cv2-modal" onClick={(event) => event.stopPropagation()} onSubmit={handleSave}>
         <div className="cv2-modal-header">
           <h2 className="cv2-modal-title">Update Availability</h2>
           <button className="cv2-modal-close" onClick={onClose} type="button">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -37,11 +90,12 @@ export function AvailabilityModal({
               <h3>I am ready to work right now</h3>
               <p>Turn this on to get matched for immediate roles.</p>
             </div>
+
             <label className="cv2-switch">
               <input
                 type="checkbox"
                 checked={availabilityDraft.is_ready_now}
-                onChange={(e) => setAvailabilityDraft((curr) => ({ ...curr, is_ready_now: e.target.checked }))}
+                onChange={(event) => setAvailabilityDraft((current) => ({ ...current, is_ready_now: event.target.checked }))}
               />
               <span className="cv2-slider" />
             </label>
@@ -51,38 +105,71 @@ export function AvailabilityModal({
             <div className="cv2-form-group">
               <label className="cv2-form-label">When can you start?</label>
 
-              {availabilityOptions.map((option, idx) => (
-                <div key={option} style={{ marginTop: idx > 0 ? "8px" : "0" }}>
-                  <label className="cv2-radio-label">
-                    <input
-                      type="radio"
-                      name="availability"
-                      checked={availabilityDraft.availability === option}
-                      onChange={() => setAvailabilityDraft((curr) => ({ ...curr, availability: option }))}
-                    />
-                    {option}
-                  </label>
-                  {option === "Immediately" && (
-                    <span className="cv2-radio-sub">Available to start right away</span>
-                  )}
+              <div className="cv2-radio-stack">
+                {availabilityOptions.map((option) => (
+                  <div className="cv2-radio-option" key={option.value}>
+                    <label className="cv2-radio-label">
+                      <input
+                        type="radio"
+                        name="availability"
+                        checked={selectedAvailability === option.value}
+                        onChange={() => handleAvailabilityChange(option.value)}
+                      />
+                      {option.label}
+                    </label>
+                    <span className="cv2-radio-sub">{option.description}</span>
+
+                    {option.value === "Custom Date" && selectedAvailability === "Custom Date" ? (
+                      <input
+                        className="cv2-date-input"
+                        type="date"
+                        value={customDate}
+                        onChange={(event) => handleCustomDateChange(event.target.value)}
+                      />
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+
+              <div className="cv2-shift-section">
+                <p className="cv2-shift-caption">Preferred Shift (Optional)</p>
+                <div className="cv2-shift-group">
+                  {shiftOptions.map((shift) => (
+                    <button
+                      key={shift}
+                      className={`cv2-shift-btn ${selectedShift === shift ? "active" : ""}`}
+                      onClick={() => setSelectedShift(shift)}
+                      type="button"
+                    >
+                      {shift}
+                    </button>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
 
             <div className="cv2-form-group">
               <label className="cv2-form-label">What employers see</label>
+
               <div className="cv2-preview-card">
-                <div className="cv2-preview-badge">
+                <div className={`cv2-preview-badge ${availabilityDraft.is_ready_now ? "" : "muted"}`}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <path d="M12 6v6l4 2" />
                   </svg>
                   {availabilityDraft.is_ready_now ? "READY NOW" : "NOT READY"}
                 </div>
+                <h3 className="cv2-preview-title">This helps you get priority for urgent hiring.</h3>
                 <p>
-                  Employers will see you as {availabilityDraft.is_ready_now ? "ready now" : "not ready right now"} with
-                  an availability of {availabilityDraft.availability.toLowerCase()}.
+                  Employers will see you as {availabilityDraft.is_ready_now ? "ready now" : "not immediately available"} with
+                  an availability of {displayAvailability.toLowerCase()}.
                 </p>
+                <div className="cv2-preview-accent">
+                  <svg width="68" height="68" viewBox="0 0 68 68" fill="none">
+                    <path d="M13 48c10-9 18-12 27-12 6 0 10 1 17 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                    <path d="m37 20 18 10-18 10 5-10-5-10Z" fill="currentColor" />
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
@@ -97,11 +184,12 @@ export function AvailabilityModal({
             </svg>
             Tip: The more accurate your availability, the better your matches.
           </div>
+
           <div className="cv2-footer-actions">
             <button className="cv2-btn-cancel" onClick={onClose} type="button">
               Cancel
             </button>
-            <button className="cv2-btn-save" type="submit" disabled={isSaving}>
+            <button className="cv2-btn-save" disabled={isSaving} type="submit">
               {isSaving ? "Saving..." : "Save Changes"}
             </button>
           </div>

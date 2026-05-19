@@ -68,6 +68,46 @@ export function CandidateSidebar({ activeTab, setActiveTab, onSignOut }) {
         </>
       ),
     },
+    {
+      id: "verifications",
+      label: "Verifications",
+      icon: (
+        <>
+          <rect x="4" y="5" width="16" height="15" rx="3" strokeWidth="2" fill="none" stroke="currentColor" />
+          <path d="m8 12 3 3 5-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" />
+        </>
+      ),
+    },
+    {
+      id: "documents",
+      label: "Documents",
+      icon: (
+        <>
+          <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" />
+          <path d="M14 2v5h5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" />
+        </>
+      ),
+    },
+    {
+      id: "messages",
+      label: "Messages",
+      badge: "2",
+      icon: (
+        <>
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" />
+        </>
+      ),
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: (
+        <>
+          <circle cx="12" cy="12" r="3" strokeWidth="2" fill="none" stroke="currentColor" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 0-.33 1V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-.33-1 1.65 1.65 0 0 0-1-.6 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 0-1-.33H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1-.33 1.65 1.65 0 0 0 .6-1 1.65 1.65 0 0 0-.33-1.82L4.3 6.46a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-.6 1.65 1.65 0 0 0 .33-1V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 .33 1 1.65 1.65 0 0 0 1 .6 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c0 .39.14.76.4 1 .26.24.61.36.96.34H21a2 2 0 0 1 0 4h-.24c-.35-.02-.7.1-.96.34-.26.24-.4.61-.4 1.32Z" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" />
+        </>
+      ),
+    },
   ];
 
   return (

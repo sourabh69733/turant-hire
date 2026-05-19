@@ -22,6 +22,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
   }, [profile]);
 
   const statusCopy = profile.is_ready_now ? "Visible to employers now" : "Turn on readiness to get urgent matches";
+  const expectedPay = profile.expected_pay || "Add expected pay";
   const lastUpdated = profile.updated_at
     ? new Date(profile.updated_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })
     : "Recently";
@@ -31,8 +32,9 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
       <div className="cv2-hero-grid">
         <div className="cv2-card cv2-hero-profile">
           <div className="cv2-profile-top">
-            <div className="cv2-avatar-lg" style={{ display: 'grid', placeItems: 'center', background: 'linear-gradient(180deg, #dbe2ea 0%, #bfc8d4 100%)', color: '#1f2937', fontSize: '2rem', fontWeight: 800 }}>
-              {initials}
+            <div className="cv2-avatar-stack">
+              <div className="cv2-avatar-lg">{initials}</div>
+              <span className="cv2-avatar-status" />
             </div>
             <div className="cv2-profile-info">
               <h1>{profile.full_name}</h1>
@@ -44,6 +46,15 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
                     <circle cx="12" cy="10" r="3" />
                   </svg>
                   {profile.location}
+                </span>
+                <span className="cv2-meta-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                    <line x1="9" x2="9.01" y1="9" y2="9" />
+                    <line x1="15" x2="15.01" y1="9" y2="9" />
+                  </svg>
+                  1.5 Years Exp
                 </span>
                 <span className="cv2-meta-item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -62,7 +73,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
                   </svg>
                   Visible to employers
                 </span>
-                <span className={`cv2-tag ${profile.is_ready_now ? 'cv2-tag-orange' : 'cv2-tag-gray'}`} style={!profile.is_ready_now ? { background: '#f3f4f6', color: '#6b7280' } : {}}>
+                <span className={`cv2-tag ${profile.is_ready_now ? "cv2-tag-orange" : "cv2-tag-gray"}`}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                   </svg>
@@ -71,6 +82,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
               </div>
             </div>
           </div>
+
           <div className="cv2-profile-stats">
             <div className="cv2-stat">
               <span className="cv2-stat-label">
@@ -89,7 +101,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
                 </svg>
                 Preferred Shift
               </span>
-              <span className="cv2-stat-value">{statusCopy}</span>
+              <span className="cv2-stat-value">{profile.is_ready_now ? "Day Shift" : statusCopy}</span>
             </div>
             <div className="cv2-stat">
               <span className="cv2-stat-label">
@@ -105,17 +117,28 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
           </div>
         </div>
 
-        <div className="cv2-ready-card" style={!profile.is_ready_now ? { background: 'linear-gradient(135deg, #4b5563 0%, #374151 100%)' } : {}}>
-          <div className="cv2-ready-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
+        <div className={`cv2-ready-card ${profile.is_ready_now ? "" : "cv2-ready-card-muted"}`}>
+          <div className="cv2-ready-top">
+            <span className="cv2-ready-pill">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+              {profile.is_ready_now ? "READY NOW" : "NOT READY"}
+            </span>
+            <div className="cv2-ready-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+            </div>
           </div>
-          <p style={{ margin: 0, textTransform: "uppercase", fontSize: "0.8rem", fontWeight: 700, letterSpacing: "0.05em" }}>
-            You are
-          </p>
-          <h2>{profile.is_ready_now ? "READY NOW!" : "NOT READY"}</h2>
-          <p>Employers can see you and match faster.</p>
+
+          <div className="cv2-ready-copy">
+            <p className="cv2-ready-eyebrow">You are</p>
+            <h2>{profile.is_ready_now ? "READY NOW!" : "AVAILABLE SOON"}</h2>
+            <p>{profile.is_ready_now ? "Employers can see you and match faster." : "Update your timeline so employers know when to reach out."}</p>
+          </div>
+
           <button className="cv2-btn-white" onClick={openAvailabilityModal} type="button">
             Update Availability
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -135,7 +158,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
             <button
               className="cv2-progress-link"
               onClick={() => setActiveTab("profile")}
-              style={{ background: 'transparent', border: 'none', width: '100%', cursor: 'pointer', padding: 0 }}
+              style={{ background: "transparent", border: "none", padding: 0 }}
               type="button"
             >
               Complete your profile
@@ -151,7 +174,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
       <div className="cv2-info-grid">
         <div className="cv2-info-item">
           <div className="cv2-info-item-header">
-            <svg className="cv2-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="cv2-info-icon blue" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
               <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
             </svg>
@@ -161,6 +184,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
             <div className="cv2-info-value">{profile.primary_role}</div>
           </div>
         </div>
+
         <div className="cv2-info-item">
           <div className="cv2-info-item-header">
             <svg className="cv2-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -173,6 +197,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
             <div className="cv2-info-value">{profile.location}</div>
           </div>
         </div>
+
         <div className="cv2-info-item">
           <div className="cv2-info-item-header">
             <svg className="cv2-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -182,11 +207,10 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
           </div>
           <div>
             <span className="cv2-info-label">Expected Pay</span>
-            <div className="cv2-info-value">
-              {profile.expected_pay}
-            </div>
+            <div className="cv2-info-value">{expectedPay}</div>
           </div>
         </div>
+
         <div className="cv2-info-item">
           <div className="cv2-info-item-header">
             <svg className="cv2-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -201,6 +225,18 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
             <div className="cv2-info-value">{profile.availability}</div>
           </div>
         </div>
+
+        <div className="cv2-info-item">
+          <div className="cv2-info-item-header">
+            <svg className="cv2-info-icon green" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </div>
+          <div>
+            <span className="cv2-info-label">Contact Verified</span>
+            <div className="cv2-info-value cv2-info-value-sm">{profile.phone ? "Phone & Email" : "Add phone number"}</div>
+          </div>
+        </div>
       </div>
 
       <div className="cv2-bottom-split">
@@ -209,7 +245,12 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
           <p className="cv2-about-text">
             {profile.profile_summary || "Add a short summary so employers understand your experience and availability quickly."}
           </p>
-          <button className="cv2-link" style={{ background: 'transparent', border: 'none', padding: 0 }} onClick={() => setActiveTab("profile")} type="button">
+          <button
+            className="cv2-link"
+            style={{ background: "transparent", border: "none", padding: 0 }}
+            onClick={() => setActiveTab("profile")}
+            type="button"
+          >
             View full profile
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14" />
@@ -217,10 +258,11 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
             </svg>
           </button>
         </div>
+
         <div className="cv2-card">
           <div className="cv2-section-title">Quick Actions</div>
           <div className="cv2-action-list">
-            <button className="cv2-action-item" onClick={() => setActiveTab("profile")} type="button" style={{ width: '100%', textAlign: 'left' }}>
+            <button className="cv2-action-item" onClick={() => setActiveTab("profile")} type="button">
               <div className="cv2-action-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 20h9" />
@@ -235,7 +277,8 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
                 <path d="m9 18 6-6-6-6" />
               </svg>
             </button>
-            <button className="cv2-action-item" onClick={openAvailabilityModal} type="button" style={{ width: '100%', textAlign: 'left' }}>
+
+            <button className="cv2-action-item" onClick={openAvailabilityModal} type="button">
               <div className="cv2-action-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
