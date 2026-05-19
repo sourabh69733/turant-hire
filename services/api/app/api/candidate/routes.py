@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_candidate_service, get_db_session
+from app.modules.candidate.service import CandidateConflictError
 from app.modules.candidate.schemas import (
     CandidateAvailabilityUpdate,
     CandidateProfileCreate,
@@ -23,7 +24,10 @@ def create_candidate_profile(
     session: Session = Depends(get_db_session),
 ) -> CandidateProfileRead:
     service = get_candidate_service(session)
-    return service.create_profile(payload)
+    try:
+        return service.create_profile(payload)
+    except CandidateConflictError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
 
 
 @router.get("/profiles/{candidate_id}", response_model=CandidateProfileRead)
@@ -43,7 +47,6 @@ def get_candidate_profile_by_auth_user_id(
     auth_user_id: str,
     session: Session = Depends(get_db_session),
 ) -> CandidateProfileRead:
-    print('[get_candidate_profile_by_auth_user_id] auth_user_id, profile', auth_user_id)
     service = get_candidate_service(session)
     profile = service.get_profile_by_auth_user_id(auth_user_id)
     if profile is None:
