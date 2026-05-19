@@ -21,8 +21,10 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
     return Math.round((checks.filter(Boolean).length / checks.length) * 100);
   }, [profile]);
 
-  const statusCopy = profile.is_ready_now ? "Visible to employers now" : "Turn on readiness to get urgent matches";
-  const expectedPay = profile.expected_pay || "Add expected pay";
+  const readinessLabel = profile.is_ready_now ? "Ready Now" : "Availability Updated";
+  const readinessCopy = profile.is_ready_now
+    ? "Employers can see you and match faster."
+    : "Update your timeline so employers know when to reach out.";
   const lastUpdated = profile.updated_at
     ? new Date(profile.updated_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })
     : "Recently";
@@ -49,21 +51,18 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
                 </span>
                 <span className="cv2-meta-item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                    <line x1="9" x2="9.01" y1="9" y2="9" />
-                    <line x1="15" x2="15.01" y1="9" y2="9" />
-                  </svg>
-                  1.5 Years Exp
-                </span>
-                <span className="cv2-meta-item">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
                     <line x1="16" x2="16" y1="2" y2="6" />
                     <line x1="8" x2="8" y1="2" y2="6" />
                     <line x1="3" x2="21" y1="10" y2="10" />
                   </svg>
                   {profile.availability}
+                </span>
+                <span className="cv2-meta-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                  </svg>
+                  {profile.phone}
                 </span>
               </div>
               <div className="cv2-profile-tags">
@@ -77,7 +76,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                   </svg>
-                  {profile.is_ready_now ? "Ready Now" : "Not Ready"}
+                  {readinessLabel}
                 </span>
               </div>
             </div>
@@ -89,9 +88,9 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                 </svg>
-                Phone Verified
+                Phone
               </span>
-              <span className="cv2-stat-value">{profile.phone || "Not provided"}</span>
+              <span className="cv2-stat-value">{profile.phone}</span>
             </div>
             <div className="cv2-stat">
               <span className="cv2-stat-label">
@@ -99,9 +98,9 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
-                Preferred Shift
+                Readiness
               </span>
-              <span className="cv2-stat-value">{profile.is_ready_now ? "Day Shift" : statusCopy}</span>
+              <span className="cv2-stat-value">{profile.is_ready_now ? "Open for urgent roles" : "Share your start timing"}</span>
             </div>
             <div className="cv2-stat">
               <span className="cv2-stat-label">
@@ -124,7 +123,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
                 <circle cx="12" cy="12" r="9" />
                 <path d="m9 12 2 2 4-4" />
               </svg>
-              {profile.is_ready_now ? "READY NOW" : "NOT READY"}
+              {profile.is_ready_now ? "READY NOW" : "PLANNING START"}
             </span>
             <div className="cv2-ready-icon">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -136,7 +135,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
           <div className="cv2-ready-copy">
             <p className="cv2-ready-eyebrow">You are</p>
             <h2>{profile.is_ready_now ? "READY NOW!" : "AVAILABLE SOON"}</h2>
-            <p>{profile.is_ready_now ? "Employers can see you and match faster." : "Update your timeline so employers know when to reach out."}</p>
+            <p>{readinessCopy}</p>
           </div>
 
           <button className="cv2-btn-white" onClick={openAvailabilityModal} type="button">
@@ -207,7 +206,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
           </div>
           <div>
             <span className="cv2-info-label">Expected Pay</span>
-            <div className="cv2-info-value">{expectedPay}</div>
+            <div className="cv2-info-value">{profile.expected_pay}</div>
           </div>
         </div>
 
@@ -233,8 +232,10 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
             </svg>
           </div>
           <div>
-            <span className="cv2-info-label">Contact Verified</span>
-            <div className="cv2-info-value cv2-info-value-sm">{profile.phone ? "Phone & Email" : "Add phone number"}</div>
+            <span className="cv2-info-label">Contact Status</span>
+            <div className="cv2-info-value cv2-info-value-sm">
+              {profile.phone && profile.email ? "Phone and email connected" : "Complete your contact details"}
+            </div>
           </div>
         </div>
       </div>
@@ -271,7 +272,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
               </div>
               <div className="cv2-action-text">
                 <div className="cv2-action-title">Edit Profile</div>
-                <div className="cv2-action-desc">Update your skills, experience and more</div>
+                <div className="cv2-action-desc">Update your basic details and summary</div>
               </div>
               <svg className="cv2-action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m9 18 6-6-6-6" />
@@ -289,7 +290,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
               </div>
               <div className="cv2-action-text">
                 <div className="cv2-action-title">Update Availability</div>
-                <div className="cv2-action-desc">Change your current readiness and start timing</div>
+                <div className="cv2-action-desc">Change your readiness and expected start timing</div>
               </div>
               <svg className="cv2-action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m9 18 6-6-6-6" />

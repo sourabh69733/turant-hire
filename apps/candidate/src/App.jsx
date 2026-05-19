@@ -21,6 +21,10 @@ export default function App() {
   const [error, setError] = useState("");
   const [isRoleBlocked, setIsRoleBlocked] = useState(false);
 
+  function clearError() {
+    setError("");
+  }
+
   useEffect(() => {
     let active = true;
 
@@ -85,8 +89,16 @@ export default function App() {
     try {
       const nextProfile = await createCandidateProfile(payload);
       setProfile(nextProfile);
+      return nextProfile;
     } catch (nextError) {
+      if (nextError.message.toLowerCase().includes("already exists for this account")) {
+        const existingProfile = await getCandidateProfileByAuthUserId(payload.auth_user_id);
+        setProfile(existingProfile);
+        return existingProfile;
+      }
+
       setError(nextError.message);
+      throw nextError;
     } finally {
       setIsSaving(false);
     }
@@ -100,12 +112,13 @@ export default function App() {
     setIsSaving(true);
     setError("");
 
-    try {
-      const nextProfile = await updateCandidateProfile(profile.id, payload);
-      setProfile(nextProfile);
-    } catch (nextError) {
-      setError(nextError.message);
-      throw nextError;
+      try {
+        const nextProfile = await updateCandidateProfile(profile.id, payload);
+        setProfile(nextProfile);
+        return nextProfile;
+      } catch (nextError) {
+        setError(nextError.message);
+        throw nextError;
     } finally {
       setIsSaving(false);
     }
@@ -119,12 +132,13 @@ export default function App() {
     setIsSaving(true);
     setError("");
 
-    try {
-      const nextProfile = await updateCandidateAvailability(profile.id, payload);
-      setProfile(nextProfile);
-    } catch (nextError) {
-      setError(nextError.message);
-      throw nextError;
+      try {
+        const nextProfile = await updateCandidateAvailability(profile.id, payload);
+        setProfile(nextProfile);
+        return nextProfile;
+      } catch (nextError) {
+        setError(nextError.message);
+        throw nextError;
     } finally {
       setIsSaving(false);
     }
@@ -161,16 +175,12 @@ export default function App() {
 
   return (
     <>
-      {error ? (
-        <div className="candidate-shell">
-          <div className="candidate-banner">{error}</div>
-        </div>
-      ) : null}
-
       {profile ? (
         <CandidateDashboard
+          error={error}
           isSaving={isSaving}
           onAvailabilitySave={handleUpdateAvailability}
+          onClearError={clearError}
           onProfileSave={handleUpdateProfile}
           onSignOut={handleSignOut}
           profile={profile}
@@ -178,8 +188,10 @@ export default function App() {
       ) : !isRoleBlocked ? (
         <CandidateOnboarding
           authUserId={session.user.id}
+          error={error}
           initialEmail={session.user.email ?? ""}
           isSaving={isSaving}
+          onClearError={clearError}
           onSave={handleCreateProfile}
         />
       ) : (

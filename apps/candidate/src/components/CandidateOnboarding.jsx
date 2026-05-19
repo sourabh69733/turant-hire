@@ -1,9 +1,31 @@
 import { useMemo, useState } from "react";
 
 const roleOptions = ["Waiter", "Receptionist", "Cashier", "Sales Executive", "Delivery Associate"];
-const availabilityOptions = ["Today", "Tomorrow", "This week", "Weekends only"];
+const availabilityOptions = ["Immediately", "Within 1 Week", "Within 2 Weeks"];
 
-export function CandidateOnboarding({ initialEmail, authUserId, onSave, isSaving }) {
+function validateForm(form) {
+  if (!form.full_name.trim()) {
+    return "Enter your full name.";
+  }
+  if (form.full_name.trim().length < 2) {
+    return "Full name must have at least 2 characters.";
+  }
+  if (!form.phone.trim()) {
+    return "Enter your phone number.";
+  }
+  if (form.phone.trim().length < 8) {
+    return "Phone number must have at least 8 characters.";
+  }
+  if (!form.location.trim()) {
+    return "Enter your location.";
+  }
+  if (!form.expected_pay.trim()) {
+    return "Enter your expected pay.";
+  }
+  return "";
+}
+
+export function CandidateOnboarding({ initialEmail, authUserId, onSave, isSaving, error, onClearError }) {
   const [form, setForm] = useState({
     auth_user_id: authUserId,
     email: initialEmail,
@@ -16,6 +38,7 @@ export function CandidateOnboarding({ initialEmail, authUserId, onSave, isSaving
     is_ready_now: true,
     profile_summary: "",
   });
+  const [localError, setLocalError] = useState("");
 
   const progress = useMemo(() => {
     const checks = [
@@ -31,16 +54,38 @@ export function CandidateOnboarding({ initialEmail, authUserId, onSave, isSaving
   }, [form]);
 
   function updateField(key, value) {
+    setLocalError("");
+    onClearError?.();
     setForm((current) => ({ ...current, [key]: value }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    onSave(form);
+
+    const validationError = validateForm(form);
+    if (validationError) {
+      setLocalError(validationError);
+      return;
+    }
+
+    try {
+      await onSave({
+        ...form,
+        full_name: form.full_name.trim(),
+        phone: form.phone.trim(),
+        location: form.location.trim(),
+        expected_pay: form.expected_pay.trim(),
+        profile_summary: form.profile_summary.trim(),
+      });
+    } catch {
+      // App-level error banner already handles the message.
+    }
   }
 
   return (
     <div className="candidate-shell">
+      {(localError || error) ? <div className="candidate-banner">{localError || error}</div> : null}
+
       <section className="candidate-panel candidate-hero-panel">
         <div>
           <span className="candidate-kicker">Candidate setup</span>

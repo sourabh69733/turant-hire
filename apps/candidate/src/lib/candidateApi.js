@@ -1,12 +1,37 @@
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000/api";
 
+const fieldLabels = {
+  auth_user_id: "Account",
+  email: "Email",
+  full_name: "Full name",
+  phone: "Phone number",
+  primary_role: "Primary role",
+  location: "Location",
+  expected_pay: "Expected pay",
+  availability: "Availability",
+  profile_summary: "Profile summary",
+};
+
+function prettifyMessage(message) {
+  if (!message) {
+    return "Request failed.";
+  }
+
+  return message
+    .replace("String should have at least", "Must have at least")
+    .replace("String should have at most", "Must have at most")
+    .replace("Field required", "This field is required")
+    .replace("Input should be a valid string", "Enter valid text")
+    .replace("Input should be a valid boolean", "Choose a valid option");
+}
+
 function normalizeErrorDetail(detail) {
   if (!detail) {
-    return "Request failed";
+    return "Request failed.";
   }
 
   if (typeof detail === "string") {
-    return detail;
+    return prettifyMessage(detail);
   }
 
   if (Array.isArray(detail)) {
@@ -17,16 +42,18 @@ function normalizeErrorDetail(detail) {
         }
 
         if (item?.msg) {
-          const field = Array.isArray(item.loc) ? item.loc.slice(1).join(".") : "";
-          return field ? `${field}: ${item.msg}` : item.msg;
+          const fieldKey = Array.isArray(item.loc) ? item.loc.slice(1).join(".") : "";
+          const field = fieldLabels[fieldKey] ?? fieldKey;
+          const message = prettifyMessage(item.msg);
+          return field ? `${field}: ${message}` : message;
         }
 
-        return "Validation error";
+        return "Validation error.";
       })
       .join(" | ");
   }
 
-  return "Request failed";
+  return "Request failed.";
 }
 
 async function parseResponse(response) {

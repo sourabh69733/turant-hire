@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const availabilityOptions = [
   {
@@ -23,7 +23,9 @@ const availabilityOptions = [
   },
 ];
 
-const shiftOptions = ["Any Shift", "Day Shift", "Night Shift", "Flexible"];
+function isCustomAvailability(value) {
+  return value && !availabilityOptions.some((option) => option.value === value);
+}
 
 export function AvailabilityModal({
   availabilityDraft,
@@ -32,12 +34,19 @@ export function AvailabilityModal({
   isSaving,
   onClose,
 }) {
-  const [selectedShift, setSelectedShift] = useState("Any Shift");
   const [customDate, setCustomDate] = useState("");
 
-  const selectedAvailability = availabilityOptions.some((option) => option.value === availabilityDraft.availability)
-    ? availabilityDraft.availability
-    : "Custom Date";
+  useEffect(() => {
+    if (isCustomAvailability(availabilityDraft.availability)) {
+      setCustomDate(availabilityDraft.availability);
+    } else {
+      setCustomDate("");
+    }
+  }, [availabilityDraft.availability]);
+
+  const selectedAvailability = isCustomAvailability(availabilityDraft.availability)
+    ? "Custom Date"
+    : availabilityDraft.availability;
 
   const displayAvailability = selectedAvailability === "Custom Date" && customDate
     ? customDate
@@ -47,7 +56,7 @@ export function AvailabilityModal({
     if (nextValue === "Custom Date") {
       setAvailabilityDraft((current) => ({
         ...current,
-        availability: customDate || "Custom Date",
+        availability: customDate || current.availability || "Custom Date",
       }));
       return;
     }
@@ -130,22 +139,6 @@ export function AvailabilityModal({
                   </div>
                 ))}
               </div>
-
-              <div className="cv2-shift-section">
-                <p className="cv2-shift-caption">Preferred Shift (Optional)</p>
-                <div className="cv2-shift-group">
-                  {shiftOptions.map((shift) => (
-                    <button
-                      key={shift}
-                      className={`cv2-shift-btn ${selectedShift === shift ? "active" : ""}`}
-                      onClick={() => setSelectedShift(shift)}
-                      type="button"
-                    >
-                      {shift}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             <div className="cv2-form-group">
@@ -159,7 +152,7 @@ export function AvailabilityModal({
                   </svg>
                   {availabilityDraft.is_ready_now ? "READY NOW" : "NOT READY"}
                 </div>
-                <h3 className="cv2-preview-title">This helps you get priority for urgent hiring.</h3>
+                <h3 className="cv2-preview-title">This is the timing employers will see.</h3>
                 <p>
                   Employers will see you as {availabilityDraft.is_ready_now ? "ready now" : "not immediately available"} with
                   an availability of {displayAvailability.toLowerCase()}.
