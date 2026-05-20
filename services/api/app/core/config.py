@@ -16,6 +16,7 @@ class Settings(BaseSettings):
         "https://api.turanthire.com",
         "https://talent.turanthire.com",
         "https://turanthire.com",
+        "https://employer.turanthire.com"
     ]
     database_url: str = "postgresql+psycopg://postgres:password@db.project-ref.supabase.co:5432/postgres"
     supabase_url: str | None = None
