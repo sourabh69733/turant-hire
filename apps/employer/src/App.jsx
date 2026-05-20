@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AuthScreen, getSupabaseBrowserClient } from "auth-ui";
 
 import { createRequirement } from "./lib/requirementApi";
@@ -70,14 +70,32 @@ function validateEmployerProfile(form) {
   if (!form.company_name.trim()) {
     return "Enter your company or organization name.";
   }
+  if (!form.industry.trim()) {
+    return "Select your industry.";
+  }
+  if (!form.company_size.trim()) {
+    return "Select your company size.";
+  }
   if (!form.locations.trim()) {
     return "Add at least one hiring location.";
+  }
+  if (!form.employee_count.trim()) {
+    return "Enter your total employee count.";
+  }
+  if (!form.hiring_team_size.trim()) {
+    return "Enter your hiring team size.";
+  }
+  if (!form.monthly_hiring_volume.trim()) {
+    return "Select your monthly hiring volume.";
   }
   if (!form.primary_contact_name.trim()) {
     return "Enter the primary contact name.";
   }
   if (!form.primary_contact_email.trim()) {
     return "Enter the work email.";
+  }
+  if (!form.primary_contact_phone.trim()) {
+    return "Enter the contact phone number.";
   }
   return "";
 }
@@ -86,11 +104,26 @@ function validateRequirementForm(form) {
   if (!form.hiring_role.trim()) {
     return "Enter the role title.";
   }
+  if (!String(form.openings).trim()) {
+    return "Enter the number of openings.";
+  }
+  if (!form.work_mode.trim()) {
+    return "Select the work mode.";
+  }
   if (!form.location.trim()) {
     return "Enter the work location.";
   }
+  if (!form.employment_type.trim()) {
+    return "Select the employment type.";
+  }
+  if (!form.joining_timeline.trim()) {
+    return "Select the joining timeline.";
+  }
   if (!form.compensation.trim()) {
     return "Enter the compensation range.";
+  }
+  if (!form.experience.trim()) {
+    return "Enter the minimum experience required.";
   }
   if (!form.must_have_skills.trim()) {
     return "Add the must-have skills.";
@@ -112,14 +145,35 @@ function splitLineValues(value) {
     .filter(Boolean);
 }
 
-function EmployerSidebar({ activeTab, onTabChange, onSignOut }) {
+function readImageFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      reject(new Error("Choose an image file to continue."));
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      reject(new Error("Only image files can be uploaded here."));
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      reject(new Error("Please upload an image smaller than 2 MB."));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = () => reject(new Error("We could not read that image file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function EmployerSidebar({ activeTab, onSupportClick, onTabChange }) {
   const items = [
     { id: "profile", label: "Profile Setup", icon: "profile" },
     { id: "requirements", label: "Hiring Requirements", icon: "briefcase" },
     { id: "review", label: "Evaluation Pipeline", icon: "pipeline" },
-    { id: "candidates", label: "Candidates", icon: "candidates", disabled: true },
-    { id: "reports", label: "Reports", icon: "reports", disabled: true },
-    { id: "settings", label: "Settings", icon: "settings", disabled: true },
   ];
 
   function renderIcon(type) {
@@ -217,7 +271,7 @@ function EmployerSidebar({ activeTab, onTabChange, onSignOut }) {
         </div>
         <div className="employer-support-title">Need help?</div>
         <div className="employer-support-copy">Our team is here to help you get started.</div>
-        <button className="employer-support-button" onClick={onSignOut} type="button">
+        <button className="employer-support-button" onClick={onSupportClick} type="button">
           Contact Support
         </button>
       </div>
@@ -225,7 +279,7 @@ function EmployerSidebar({ activeTab, onTabChange, onSignOut }) {
   );
 }
 
-function TopBar({ step, companyName, email }) {
+function TopBar({ companyLogoUrl, companyName, email, onAccountClick, onBellClick, onPhotoClick, onSignOut, profilePhotoUrl, step }) {
   const steps = [1, 2, 3];
   const titleMap = {
     1: "Profile Setup",
@@ -253,9 +307,9 @@ function TopBar({ step, companyName, email }) {
       </div>
 
       <div className="employer-topbar-right">
-        <div className="employer-account-chip">
+        <button className="employer-account-chip" onClick={onAccountClick} type="button">
           <div className="employer-account-avatar">
-            {(companyName || email || "AC").slice(0, 2).toUpperCase()}
+            {companyLogoUrl ? <img alt="Company logo" src={companyLogoUrl} /> : (companyName || email || "AC").slice(0, 2).toUpperCase()}
           </div>
           <div className="employer-account-copy">
             <strong>{companyName || "Employer Account"}</strong>
@@ -264,15 +318,25 @@ function TopBar({ step, companyName, email }) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="m6 9 6 6 6-6" />
           </svg>
-        </div>
-        <button className="employer-icon-button" type="button">
+        </button>
+        <button className="employer-icon-button" onClick={onBellClick} type="button">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
             <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
           </svg>
           <span className="employer-notification-dot" />
         </button>
-        <div className="employer-user-avatar">👨🏻</div>
+        <button
+          className="employer-user-avatar employer-user-avatar-button"
+          onClick={onPhotoClick}
+          title="Update profile photo"
+          type="button"
+        >
+          {profilePhotoUrl ? <img alt="Employer profile" src={profilePhotoUrl} /> : "👨🏻"}
+        </button>
+        <button className="employer-signout-button" onClick={onSignOut} type="button">
+          Sign out
+        </button>
       </div>
     </div>
   );
@@ -475,7 +539,20 @@ function ReviewHelperCard() {
   );
 }
 
-function EmployerProfileStep({ form, setForm, authUserId, email, setError, setMessage }) {
+function EmployerProfileStep({
+  form,
+  setForm,
+  authUserId,
+  email,
+  onCompanyLogoPick,
+  onProfilePhotoPick,
+  onRemoveCompanyLogo,
+  onRemoveProfilePhoto,
+  setError,
+  setMessage,
+}) {
+  const [locationInput, setLocationInput] = useState("");
+
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(getProfileStorageKey(authUserId));
@@ -514,6 +591,32 @@ function EmployerProfileStep({ form, setForm, authUserId, email, setError, setMe
     updateField("locations", nextLocations);
   }
 
+  function addLocationTag(rawValue) {
+    const nextValue = rawValue.trim();
+    if (!nextValue) {
+      return;
+    }
+
+    const nextTags = [...locationTags];
+    if (!nextTags.includes(nextValue)) {
+      nextTags.push(nextValue);
+    }
+
+    updateField("locations", nextTags.join(", "));
+    setLocationInput("");
+  }
+
+  function handleLocationKeyDown(event) {
+    if (event.key === "Enter" || event.key === ",") {
+      event.preventDefault();
+      addLocationTag(locationInput);
+    }
+    if (event.key === "Backspace" && !locationInput && locationTags.length) {
+      event.preventDefault();
+      removeLocationTag(locationTags[locationTags.length - 1]);
+    }
+  }
+
   return (
     <>
       <div className="employer-page-heading">
@@ -523,6 +626,48 @@ function EmployerProfileStep({ form, setForm, authUserId, email, setError, setMe
 
       <div className="employer-content-grid">
         <div className="employer-form-card">
+          <section className="employer-branding-panel">
+            <div className="employer-branding-card">
+              <div className="employer-branding-preview employer-branding-preview-logo">
+                {form.company_logo_url ? <img alt="Company logo" src={form.company_logo_url} /> : <span>Logo</span>}
+              </div>
+              <div className="employer-branding-copy">
+                <strong>Company logo</strong>
+                <p>Upload a clean brand mark to personalize the employer workspace.</p>
+              </div>
+              <div className="employer-branding-actions">
+                <button className="employer-plain-action employer-small-action" onClick={onCompanyLogoPick} type="button">
+                  {form.company_logo_url ? "Replace" : "Upload"}
+                </button>
+                {form.company_logo_url ? (
+                  <button className="employer-text-action" onClick={onRemoveCompanyLogo} type="button">
+                    Remove
+                  </button>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="employer-branding-card">
+              <div className="employer-branding-preview employer-branding-preview-photo">
+                {form.profile_photo_url ? <img alt="Employer profile" src={form.profile_photo_url} /> : <span>Photo</span>}
+              </div>
+              <div className="employer-branding-copy">
+                <strong>Hiring lead photo</strong>
+                <p>This appears in the top-right account area so your workspace feels personal.</p>
+              </div>
+              <div className="employer-branding-actions">
+                <button className="employer-plain-action employer-small-action" onClick={onProfilePhotoPick} type="button">
+                  {form.profile_photo_url ? "Replace" : "Upload"}
+                </button>
+                {form.profile_photo_url ? (
+                  <button className="employer-text-action" onClick={onRemoveProfilePhoto} type="button">
+                    Remove
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </section>
+
           <div className="employer-form-card-head">
             <div className="employer-form-card-icon">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
@@ -542,6 +687,7 @@ function EmployerProfileStep({ form, setForm, authUserId, email, setError, setMe
             <label>
               <span className="employer-label-text">Industry <span>*</span></span>
               <select onChange={(event) => updateField("industry", event.target.value)} value={form.industry}>
+                <option value="">Select industry</option>
                 {industryOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -552,6 +698,7 @@ function EmployerProfileStep({ form, setForm, authUserId, email, setError, setMe
             <label>
               <span className="employer-label-text">Company Size <span>*</span></span>
               <select onChange={(event) => updateField("company_size", event.target.value)} value={form.company_size}>
+                <option value="">Select company size</option>
                 {companySizeOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -573,12 +720,16 @@ function EmployerProfileStep({ form, setForm, authUserId, email, setError, setMe
                     </button>
                   </span>
                 ))}
+                <input
+                  className="employer-location-input"
+                  onBlur={() => addLocationTag(locationInput)}
+                  onChange={(event) => setLocationInput(event.target.value)}
+                  onKeyDown={handleLocationKeyDown}
+                  placeholder={locationTags.length ? "Add another location" : "Type a city or area and press Enter"}
+                  value={locationInput}
+                />
               </div>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m6 9 6 6 6-6" />
-              </svg>
             </div>
-            <input className="employer-hidden-input" onChange={(event) => updateField("locations", event.target.value)} value={form.locations} />
             <div className="employer-field-note">Add all major locations where you hire.</div>
           </label>
 
@@ -594,6 +745,7 @@ function EmployerProfileStep({ form, setForm, authUserId, email, setError, setMe
             <label>
               <span className="employer-label-text">Monthly Hiring Volume <span>*</span></span>
               <select onChange={(event) => updateField("monthly_hiring_volume", event.target.value)} value={form.monthly_hiring_volume}>
+                <option value="">Select monthly hiring volume</option>
                 {hiringVolumeOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -716,6 +868,7 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
               <label>
                 <span className="employer-label-text">Work Mode <span>*</span></span>
                 <select onChange={(event) => updateField("work_mode", event.target.value)} value={form.work_mode}>
+                  <option value="">Select work mode</option>
                   {workModeOptions.map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -730,6 +883,7 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
               <label>
                 <span className="employer-label-text">Employment Type <span>*</span></span>
                 <select onChange={(event) => updateField("employment_type", event.target.value)} value={form.employment_type}>
+                  <option value="">Select employment type</option>
                   {employmentTypeOptions.map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -754,6 +908,7 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
               <label>
                 <span className="employer-label-text">Joining Timeline <span>*</span></span>
                 <select onChange={(event) => updateField("joining_timeline", event.target.value)} value={form.joining_timeline}>
+                  <option value="">Select joining timeline</option>
                   {timelineOptions.map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -768,6 +923,7 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
               <label>
                 <span className="employer-label-text">Hiring Priority</span>
                 <select onChange={(event) => updateField("priority", event.target.value)} value={form.priority}>
+                  <option value="">Select hiring priority</option>
                   {priorityOptions.map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -1022,6 +1178,8 @@ function EmployerReviewStep({ profileForm, requirementForm }) {
 
 export default function App() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const companyLogoInputRef = useRef(null);
+  const profilePhotoInputRef = useRef(null);
   const [session, setSession] = useState(null);
   const [isChecking, setIsChecking] = useState(true);
   const [error, setError] = useState("");
@@ -1029,28 +1187,30 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
   const [profileForm, setProfileForm] = useState({
+    company_logo_url: "",
     company_name: "",
-    industry: industryOptions[0],
-    company_size: companySizeOptions[2],
-    locations: "Mumbai, Maharashtra, Bengaluru, Karnataka",
+    industry: "",
+    company_size: "",
+    locations: "",
     employee_count: "",
     hiring_team_size: "",
-    monthly_hiring_volume: hiringVolumeOptions[1],
+    monthly_hiring_volume: "",
     primary_contact_name: "",
     primary_contact_email: "",
     primary_contact_phone: "",
+    profile_photo_url: "",
     current_process_note: "",
   });
   const [requirementForm, setRequirementForm] = useState({
     hiring_role: "",
-    openings: 1,
+    openings: "",
     department: "",
-    work_mode: workModeOptions[0],
+    work_mode: "",
     location: "",
-    employment_type: employmentTypeOptions[0],
-    joining_timeline: timelineOptions[0],
+    employment_type: "",
+    joining_timeline: "",
     compensation: "",
-    priority: priorityOptions[1],
+    priority: "",
     experience: "",
     must_have_skills: "",
     language_requirements: "",
@@ -1113,6 +1273,46 @@ export default function App() {
 
   async function handleSignOut() {
     await supabase.auth.signOut();
+  }
+
+  function handleSupportClick() {
+    window.location.href = "mailto:support@turanthire.com?subject=TurantHire%20Employer%20Support";
+  }
+
+  function handleAccountClick() {
+    setActiveTab("profile");
+    setMessage("Showing your employer profile setup.");
+    setError("");
+  }
+
+  function handleBellClick() {
+    setMessage("Notifications will appear here as soon as evaluations and candidate updates are available.");
+    setError("");
+  }
+
+  function handlePhotoPick(ref) {
+    ref.current?.click();
+  }
+
+  async function handleImageChange(key, event) {
+    const [file] = Array.from(event.target.files ?? []);
+    event.target.value = "";
+
+    try {
+      const imageUrl = await readImageFile(file);
+      setProfileForm((current) => ({ ...current, [key]: imageUrl }));
+      setError("");
+      setMessage(key === "company_logo_url" ? "Company logo updated." : "Profile photo updated.");
+    } catch (nextError) {
+      setError(nextError.message);
+      setMessage("");
+    }
+  }
+
+  function removeImage(key) {
+    setProfileForm((current) => ({ ...current, [key]: "" }));
+    setError("");
+    setMessage(key === "company_logo_url" ? "Company logo removed." : "Profile photo removed.");
   }
 
   function saveProfileDraft() {
@@ -1214,10 +1414,35 @@ export default function App() {
 
   return (
     <div className="employer-layout">
-      <EmployerSidebar activeTab={activeTab} onSignOut={handleSignOut} onTabChange={setActiveTab} />
+      <EmployerSidebar activeTab={activeTab} onSupportClick={handleSupportClick} onTabChange={setActiveTab} />
 
       <main className="employer-main">
-        <TopBar step={step} companyName={profileForm.company_name} email={session.user.email ?? ""} />
+        <TopBar
+          companyLogoUrl={profileForm.company_logo_url}
+          companyName={profileForm.company_name}
+          email={session.user.email ?? ""}
+          onAccountClick={handleAccountClick}
+          onBellClick={handleBellClick}
+          onPhotoClick={() => handlePhotoPick(profilePhotoInputRef)}
+          onSignOut={handleSignOut}
+          profilePhotoUrl={profileForm.profile_photo_url}
+          step={step}
+        />
+
+        <input
+          accept="image/*"
+          className="employer-hidden-file-input"
+          onChange={(event) => handleImageChange("company_logo_url", event)}
+          ref={companyLogoInputRef}
+          type="file"
+        />
+        <input
+          accept="image/*"
+          className="employer-hidden-file-input"
+          onChange={(event) => handleImageChange("profile_photo_url", event)}
+          ref={profilePhotoInputRef}
+          type="file"
+        />
 
         {error ? <div className="employer-banner employer-banner-error">{error}</div> : null}
         {message ? <div className="employer-banner employer-banner-success">{message}</div> : null}
@@ -1227,6 +1452,10 @@ export default function App() {
             authUserId={session.user.id}
             email={session.user.email ?? ""}
             form={profileForm}
+            onCompanyLogoPick={() => handlePhotoPick(companyLogoInputRef)}
+            onProfilePhotoPick={() => handlePhotoPick(profilePhotoInputRef)}
+            onRemoveCompanyLogo={() => removeImage("company_logo_url")}
+            onRemoveProfilePhoto={() => removeImage("profile_photo_url")}
             setError={setError}
             setForm={setProfileForm}
             setMessage={setMessage}
