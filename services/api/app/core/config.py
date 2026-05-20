@@ -13,6 +13,7 @@ class Settings(BaseSettings):
         "http://127.0.0.1:4175",
         "http://localhost:4174",
         "http://localhost:4175",
+        "https://api.turanthire.com",
     ]
     database_url: str = "postgresql+psycopg://postgres:password@db.project-ref.supabase.co:5432/postgres"
     supabase_url: str | None = None
