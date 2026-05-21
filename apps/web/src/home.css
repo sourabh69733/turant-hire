@@ -454,7 +454,14 @@
   .th-problem-grid,
   .th-usecase-grid { grid-template-columns: repeat(2, 1fr); }
   .th-steps-row { flex-direction: column; align-items: center; }
-  .th-step-arrow-wrap { transform: rotate(90deg); margin: 8px 0; }
+  .th-step-wrap { flex-direction: column; align-items: center; }
+  .th-step { width: min(100%, 360px); }
+  .th-step-arrow-wrap {
+    justify-content: center;
+    margin: 35px 0 36px;
+    padding: 0;
+    transform: rotate(90deg);
+  }
   .th-cta-inner { flex-direction: column; align-items: flex-start; }
   .th-footer-inner { flex-direction: column; }
   .th-footer-bottom { text-align: left; }
