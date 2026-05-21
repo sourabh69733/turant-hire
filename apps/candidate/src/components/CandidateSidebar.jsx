@@ -42,32 +42,32 @@ export function CandidateSidebar({ activeTab, setActiveTab, onSignOut }) {
         </>
       ),
     },
-    {
-      id: "availability",
-      label: "Availability",
-      icon: (
-        <>
-          <circle
-            cx="12"
-            cy="12"
-            r="10"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-            stroke="currentColor"
-          />
-          <polyline
-            points="12 6 12 12 16 14"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-            stroke="currentColor"
-          />
-        </>
-      ),
-    },
+    // {
+    //   id: "availability",
+    //   label: "Availability",
+    //   icon: (
+    //     <>
+    //       <circle
+    //         cx="12"
+    //         cy="12"
+    //         r="10"
+    //         strokeWidth="2"
+    //         strokeLinecap="round"
+    //         strokeLinejoin="round"
+    //         fill="none"
+    //         stroke="currentColor"
+    //       />
+    //       <polyline
+    //         points="12 6 12 12 16 14"
+    //         strokeWidth="2"
+    //         strokeLinecap="round"
+    //         strokeLinejoin="round"
+    //         fill="none"
+    //         stroke="currentColor"
+    //       />
+    //     </>
+    //   ),
+    // },
     // {
     //   id: "verifications",
     //   label: "Verifications",
