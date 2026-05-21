@@ -423,7 +423,7 @@ export default function HomePage() {
           <div className="th-cta-inner">
             <div className="th-cta-copy">
               <h2 className="th-cta-title">Need to hire someone urgently?</h2>
-              <p className="th-cta-sub">Start with one requirement. We'll help you find ready candidates faster.</p>
+              <p className="th-cta-sub" style={{marginTop: "10px"}}>Start with one requirement. We'll help you find ready candidates faster.</p>
             </div>
             <a className="th-btn th-btn-primary th-btn-lg" href={appUrls.employer}>
               Start Hiring <ArrowRight />
