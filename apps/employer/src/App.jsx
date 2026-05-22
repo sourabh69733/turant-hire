@@ -1183,6 +1183,7 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [isChecking, setIsChecking] = useState(true);
   const [error, setError] = useState("");
+  const [hasRoleAccess, setHasRoleAccess] = useState(false);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
@@ -1245,11 +1246,13 @@ export default function App() {
   useEffect(() => {
     async function verifyEmployerRole() {
       if (!session?.user?.id) {
+        setHasRoleAccess(false);
         return;
       }
 
       setIsChecking(true);
       setError("");
+      setHasRoleAccess(false);
 
       try {
         await ensureAppUser({
@@ -1257,11 +1260,13 @@ export default function App() {
           email: session.user.email ?? "",
           role: "employer",
         });
+        setHasRoleAccess(true);
         setProfileForm((current) => ({
           ...current,
           primary_contact_email: current.primary_contact_email || session.user.email || "",
         }));
       } catch (nextError) {
+        setHasRoleAccess(false);
         setError(nextError.message);
       } finally {
         setIsChecking(false);
@@ -1406,6 +1411,19 @@ export default function App() {
     return (
       <div className="employer-loading-shell">
         <div className="employer-loading-card employer-error-card">{error}</div>
+      </div>
+    );
+  }
+
+  if (session && !hasRoleAccess) {
+    return (
+      <div className="employer-loading-shell">
+        <div className="employer-loading-card employer-error-card">
+          <div style={{ marginBottom: 14 }}>{error || "This account cannot access the employer workspace."}</div>
+          <button className="employer-signout-button" onClick={handleSignOut} type="button">
+            Sign out
+          </button>
+        </div>
       </div>
     );
   }
