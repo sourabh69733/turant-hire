@@ -92,7 +92,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
               </span>
               <span className="cv2-stat-value">{profile.phone}</span>
             </div>
-            <div className="cv2-stat">
+            {/* <div className="cv2-stat">
               <span className="cv2-stat-label">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
@@ -101,7 +101,7 @@ export function DashboardView({ profile, setActiveTab, openAvailabilityModal }) 
                 Readiness
               </span>
               <span className="cv2-stat-value">{profile.is_ready_now ? "Open for urgent roles" : "Share your start timing"}</span>
-            </div>
+            </div> */}
             <div className="cv2-stat">
               <span className="cv2-stat-label">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
