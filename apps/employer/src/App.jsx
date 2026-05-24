@@ -1182,6 +1182,7 @@ export default function App() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const companyLogoInputRef = useRef(null);
   const profilePhotoInputRef = useRef(null);
+  const authUserIdRef = useRef(null);
   const [session, setSession] = useState(null);
   const [isChecking, setIsChecking] = useState(true);
   const [isSessionResolved, setIsSessionResolved] = useState(false);
@@ -1243,6 +1244,7 @@ export default function App() {
         return;
       }
       setSession(data.session);
+      authUserIdRef.current = data.session?.user?.id ?? null;
       setIsSessionResolved(true);
       if (!data.session) {
         setIsChecking(false);
@@ -1250,12 +1252,16 @@ export default function App() {
     });
 
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      const nextUserId = nextSession?.user?.id ?? null;
+      const previousUserId = authUserIdRef.current;
+      authUserIdRef.current = nextUserId;
+
       setSession(nextSession);
       setIsSessionResolved(true);
       if (!nextSession) {
         setHasRoleAccess(false);
         setIsChecking(false);
-      } else {
+      } else if (nextUserId !== previousUserId) {
         setIsChecking(true);
       }
     });
