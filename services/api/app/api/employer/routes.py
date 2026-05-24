@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db_session, get_requirement_service
+from app.api.dependencies import get_db_session, get_employer_agent_service, get_requirement_service
+from app.modules.employer_agent.schemas import EmployerAgentChatRequest, EmployerAgentChatResponse
 from app.modules.requirement.schemas import RequirementCreate, RequirementRead
+from app.modules.employer_agent.service import EmployerAgentService
 
 router = APIRouter()
 
@@ -28,3 +30,11 @@ def list_requirements(
 ) -> list[RequirementRead]:
     service = get_requirement_service(session)
     return service.list_requirements(employer_auth_user_id)
+
+
+@router.post("/agent/chat", response_model=EmployerAgentChatResponse)
+def employer_agent_chat(
+    payload: EmployerAgentChatRequest,
+    service: EmployerAgentService = Depends(get_employer_agent_service),
+) -> EmployerAgentChatResponse:
+    return service.chat(payload)

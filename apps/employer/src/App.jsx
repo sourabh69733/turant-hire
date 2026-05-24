@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AuthScreen, getSupabaseBrowserClient } from "auth-ui";
 
+import { EmployerRequirementAgent } from "./components/EmployerRequirementAgent";
+import { sendEmployerAgentMessage } from "./lib/employerAgentApi";
 import { createRequirement } from "./lib/requirementApi";
 import { ensureAppUser } from "./lib/userApi";
 import "./employer.css";
@@ -1182,11 +1184,22 @@ export default function App() {
   const profilePhotoInputRef = useRef(null);
   const [session, setSession] = useState(null);
   const [isChecking, setIsChecking] = useState(true);
+  const [isSessionResolved, setIsSessionResolved] = useState(false);
   const [error, setError] = useState("");
   const [hasRoleAccess, setHasRoleAccess] = useState(false);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAgentLoading, setIsAgentLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
+  const [agentMessages, setAgentMessages] = useState([
+    {
+      role: "assistant",
+      content:
+        "Tell me about the role you need to hire for, and I’ll turn it into a structured hiring brief.",
+    },
+  ]);
+  const [agentMissingFields, setAgentMissingFields] = useState([]);
+  const [agentReadyToReview, setAgentReadyToReview] = useState(false);
   const [profileForm, setProfileForm] = useState({
     company_logo_url: "",
     company_name: "",
@@ -1230,11 +1243,21 @@ export default function App() {
         return;
       }
       setSession(data.session);
-      setIsChecking(false);
+      setIsSessionResolved(true);
+      if (!data.session) {
+        setIsChecking(false);
+      }
     });
 
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
+      setIsSessionResolved(true);
+      if (!nextSession) {
+        setHasRoleAccess(false);
+        setIsChecking(false);
+      } else {
+        setIsChecking(true);
+      }
     });
 
     return () => {
@@ -1244,6 +1267,10 @@ export default function App() {
   }, [supabase]);
 
   useEffect(() => {
+    if (!isSessionResolved) {
+      return;
+    }
+
     async function verifyEmployerRole() {
       if (!session?.user?.id) {
         setHasRoleAccess(false);
@@ -1274,7 +1301,7 @@ export default function App() {
     }
 
     verifyEmployerRole();
-  }, [session?.user?.email, session?.user?.id]);
+  }, [isSessionResolved, session?.user?.email, session?.user?.id]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -1318,6 +1345,39 @@ export default function App() {
     setProfileForm((current) => ({ ...current, [key]: "" }));
     setError("");
     setMessage(key === "company_logo_url" ? "Company logo removed." : "Profile photo removed.");
+  }
+
+  async function handleEmployerAgentMessage(userContent) {
+    const nextMessages = [...agentMessages, { role: "user", content: userContent }];
+    setAgentMessages(nextMessages);
+    setIsAgentLoading(true);
+    setError("");
+
+    try {
+      const response = await sendEmployerAgentMessage({
+        messages: nextMessages.map((message) => ({
+          role: message.role,
+          content: message.content,
+        })),
+        current_draft: requirementForm,
+      });
+
+      setAgentMessages((current) => [
+        ...current,
+        { role: "assistant", content: response.assistant_message },
+      ]);
+      setAgentMissingFields(response.missing_fields ?? []);
+      setAgentReadyToReview(Boolean(response.ready_to_review));
+      setRequirementForm((current) => ({
+        ...current,
+        ...response.structured_requirement,
+      }));
+      setMessage("Employer agent updated your requirement draft.");
+    } catch (nextError) {
+      setError(nextError.message);
+    } finally {
+      setIsAgentLoading(false);
+    }
   }
 
   function saveProfileDraft() {
@@ -1481,13 +1541,22 @@ export default function App() {
         ) : null}
 
         {activeTab === "requirements" ? (
-          <EmployerRequirementStep
-            authUserId={session.user.id}
-            form={requirementForm}
-            setError={setError}
-            setForm={setRequirementForm}
-            setMessage={setMessage}
-          />
+          <>
+            <EmployerRequirementAgent
+              isLoading={isAgentLoading}
+              messages={agentMessages}
+              missingFields={agentMissingFields}
+              onSendMessage={handleEmployerAgentMessage}
+              readyToReview={agentReadyToReview}
+            />
+            <EmployerRequirementStep
+              authUserId={session.user.id}
+              form={requirementForm}
+              setError={setError}
+              setForm={setRequirementForm}
+              setMessage={setMessage}
+            />
+          </>
         ) : null}
 
         {activeTab === "review" ? (

@@ -380,6 +380,162 @@ img {
   line-height: 1.55;
 }
 
+.employer-agent-card {
+  margin: 26px 0 18px;
+  padding: 22px;
+  border: 1px solid #ecdcc8;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 163, 77, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(255, 251, 246, 0.98) 0%, rgba(255, 248, 242, 1) 100%);
+  box-shadow: 0 10px 30px rgba(31, 36, 41, 0.05);
+}
+
+.employer-agent-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.employer-agent-kicker {
+  margin-bottom: 8px;
+  color: #c47017;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.employer-agent-head h3 {
+  margin: 0 0 6px;
+  color: #1f2937;
+  font-size: 1.3rem;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+
+.employer-agent-head p {
+  margin: 0;
+  color: #667085;
+  font-size: 0.93rem;
+  line-height: 1.6;
+}
+
+.employer-agent-status {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid #f1dcc8;
+  background: #fff6ec;
+  color: #b96913;
+  font-size: 0.83rem;
+  font-weight: 800;
+}
+
+.employer-agent-status.ready {
+  border-color: rgba(34, 197, 94, 0.2);
+  background: #ecfdf3;
+  color: #18794e;
+}
+
+.employer-agent-missing {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.employer-agent-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #efdfcf;
+  color: #87511a;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.employer-agent-thread {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.employer-agent-bubble {
+  max-width: min(760px, 100%);
+  padding: 14px 16px;
+  border-radius: 18px;
+  font-size: 0.93rem;
+  line-height: 1.6;
+  box-shadow: 0 8px 18px rgba(31, 36, 41, 0.04);
+}
+
+.employer-agent-bubble.assistant {
+  border: 1px solid #ebdfd0;
+  background: rgba(255, 255, 255, 0.96);
+  color: #273240;
+}
+
+.employer-agent-bubble.user {
+  justify-self: end;
+  border: 1px solid rgba(255, 143, 51, 0.12);
+  background: linear-gradient(180deg, #ff9837 0%, #ff7b0d 100%);
+  color: #fff;
+}
+
+.employer-agent-bubble.loading {
+  color: #667085;
+  font-style: italic;
+}
+
+.employer-agent-form {
+  display: grid;
+  gap: 12px;
+}
+
+.employer-agent-input {
+  width: 100%;
+  min-height: 104px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid #dfd7cd;
+  background: rgba(255, 255, 255, 0.94);
+  color: #1f2937;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.employer-agent-input:focus {
+  outline: none;
+  border-color: #ffc089;
+  box-shadow: 0 0 0 4px rgba(255, 123, 13, 0.08);
+}
+
+.employer-agent-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.employer-agent-actions span {
+  color: #7a8391;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
 .employer-content-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
@@ -1166,7 +1322,9 @@ img {
   }
 
   .employer-form-section-header,
-  .employer-summary-hero {
+  .employer-summary-hero,
+  .employer-agent-head,
+  .employer-agent-actions {
     grid-template-columns: 1fr;
     display: grid;
   }
@@ -1235,6 +1393,14 @@ img {
   .employer-form-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+
+  .employer-agent-card {
+    padding: 18px;
+  }
+
+  .employer-agent-thread {
+    max-height: 300px;
   }
 
   .employer-branding-card {

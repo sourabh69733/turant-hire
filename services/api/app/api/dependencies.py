@@ -6,6 +6,7 @@ from app.db.session import SessionLocal
 from app.db.store.sqlalchemy_store import SQLAlchemyStore
 from app.modules.candidate.repository import CandidateRepository
 from app.modules.candidate.service import CandidateService
+from app.modules.employer_agent.service import EmployerAgentService
 from app.modules.requirement.repository import RequirementRepository
 from app.modules.requirement.service import RequirementService
 from app.modules.user.repository import UserRepository
@@ -36,3 +37,7 @@ def get_requirement_service(session: Session) -> RequirementService:
     store = SQLAlchemyStore(session)
     repository = RequirementRepository(store)
     return RequirementService(repository)
+
+
+def get_employer_agent_service() -> EmployerAgentService:
+    return EmployerAgentService()

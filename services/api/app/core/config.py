@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     supabase_url: str | None = None
     supabase_anon_key: str | None = None
     supabase_service_role_key: str | None = None
+    groq_api_key: str | None = None
+    groq_model: str = "llama-3.3-70b-versatile"
+    groq_base_url: str = "https://api.groq.com/openai/v1"
 
     model_config = SettingsConfigDict(
         env_file=".env",
