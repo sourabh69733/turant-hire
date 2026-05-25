@@ -1360,8 +1360,9 @@ export default function App() {
     setError("");
 
     try {
+      const recentMessages = nextMessages.slice(-16);
       const response = await sendEmployerAgentMessage({
-        messages: nextMessages.map((message) => ({
+        messages: recentMessages.map((message) => ({
           role: message.role,
           content: message.content,
         })),

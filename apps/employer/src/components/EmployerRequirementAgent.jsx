@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function EmployerRequirementAgent({
   messages,
@@ -8,6 +8,15 @@ export function EmployerRequirementAgent({
   isLoading,
 }) {
   const [input, setInput] = useState("");
+  const threadRef = useRef(null);
+
+  useEffect(() => {
+    if (!threadRef.current) {
+      return;
+    }
+
+    threadRef.current.scrollTop = threadRef.current.scrollHeight;
+  }, [isLoading, messages]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -18,6 +27,13 @@ export function EmployerRequirementAgent({
 
     setInput("");
     await onSendMessage(nextValue);
+  }
+
+  function handleKeyDown(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
+    }
   }
 
   return (
@@ -43,7 +59,7 @@ export function EmployerRequirementAgent({
         </div>
       ) : null}
 
-      <div className="employer-agent-thread">
+      <div className="employer-agent-thread" ref={threadRef}>
         {messages.map((message, index) => (
           <div className={`employer-agent-bubble ${message.role}`} key={`${message.role}-${index}`}>
             <span>{message.content}</span>
@@ -55,6 +71,7 @@ export function EmployerRequirementAgent({
       <form className="employer-agent-form" onSubmit={handleSubmit}>
         <textarea
           className="employer-agent-input"
+          onKeyDown={handleKeyDown}
           onChange={(event) => setInput(event.target.value)}
           placeholder="Example: I need 3 waiters for our Bandra cafe, evening shift, immediate joining, salary around 18k."
           rows="3"
