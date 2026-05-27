@@ -8,11 +8,13 @@ class EmployerAgentMessage(BaseModel):
 
 class EmployerRequirementDraft(BaseModel):
     hiring_role: str | None = Field(default=None, max_length=120)
+    role_specialization: str | None = Field(default=None, max_length=160)
     openings: str | None = Field(default=None, max_length=20)
     department: str | None = Field(default=None, max_length=120)
     work_mode: str | None = Field(default=None, max_length=80)
     location: str | None = Field(default=None, max_length=160)
     employment_type: str | None = Field(default=None, max_length=80)
+    shift_timing: str | None = Field(default=None, max_length=160)
     joining_timeline: str | None = Field(default=None, max_length=120)
     compensation: str | None = Field(default=None, max_length=120)
     priority: str | None = Field(default=None, max_length=80)
@@ -36,3 +38,9 @@ class EmployerAgentChatResponse(BaseModel):
     structured_requirement: EmployerRequirementDraft
     missing_fields: list[str] = Field(default_factory=list)
     ready_to_review: bool = False
+    conversation_status: str = Field(default="needs_followup")
+    intake_mode: str = Field(default="minimum")
+    role_bucket: str = Field(default="medium")
+    next_action: str = Field(default="ask_next_question")
+    can_finalize_now: bool = False
+    employer_finished: bool = False
