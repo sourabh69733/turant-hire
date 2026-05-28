@@ -677,6 +677,10 @@ img {
   gap: 4px;
 }
 
+.employer-form-card label.is-invalid {
+  color: #b42318;
+}
+
 .employer-form-card label span {
   color: #ff7b0d;
 }
@@ -710,6 +714,47 @@ img {
   min-height: 92px;
   resize: vertical;
   line-height: 1.6;
+}
+
+.employer-form-card label.is-invalid input,
+.employer-form-card label.is-invalid select,
+.employer-form-card label.is-invalid textarea,
+.employer-location-box.is-invalid {
+  border-color: #f04438;
+  background: #fff7f6;
+}
+
+.employer-form-card label.is-invalid input:focus,
+.employer-form-card label.is-invalid select:focus,
+.employer-form-card label.is-invalid textarea:focus,
+.employer-location-box.is-invalid:focus-within {
+  border-color: #f04438;
+  box-shadow: 0 0 0 4px rgba(240, 68, 56, 0.12);
+  background: #fff7f6;
+}
+
+.employer-field-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #b42318;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.employer-field-error::before {
+  content: "!";
+  width: 16px;
+  height: 16px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #f04438;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  flex-shrink: 0;
 }
 
 .employer-wide-field {

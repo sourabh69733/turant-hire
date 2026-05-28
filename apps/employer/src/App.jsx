@@ -68,69 +68,100 @@ function getRequirementStorageKey(authUserId) {
   return `turant_hire_employer_requirement_${authUserId}`;
 }
 
+function getRequirementAgentStorageKey(authUserId) {
+  return `turant_hire_employer_requirement_agent_${authUserId}`;
+}
+
 function validateEmployerProfile(form) {
+  const errors = {};
+
   if (!form.company_name.trim()) {
-    return "Enter your company or organization name.";
+    errors.company_name = "Enter your company or organization name.";
   }
   if (!form.industry.trim()) {
-    return "Select your industry.";
+    errors.industry = "Select your industry.";
   }
   if (!form.company_size.trim()) {
-    return "Select your company size.";
+    errors.company_size = "Select your company size.";
   }
   if (!form.locations.trim()) {
-    return "Add at least one hiring location.";
+    errors.locations = "Add at least one hiring location.";
   }
   if (!form.employee_count.trim()) {
-    return "Enter your total employee count.";
+    errors.employee_count = "Enter your total employee count.";
   }
   if (!form.hiring_team_size.trim()) {
-    return "Enter your hiring team size.";
+    errors.hiring_team_size = "Enter your hiring team size.";
   }
   if (!form.monthly_hiring_volume.trim()) {
-    return "Select your monthly hiring volume.";
+    errors.monthly_hiring_volume = "Select your monthly hiring volume.";
   }
   if (!form.primary_contact_name.trim()) {
-    return "Enter the primary contact name.";
+    errors.primary_contact_name = "Enter the primary contact name.";
   }
   if (!form.primary_contact_email.trim()) {
-    return "Enter the work email.";
+    errors.primary_contact_email = "Enter the work email.";
   }
   if (!form.primary_contact_phone.trim()) {
-    return "Enter the contact phone number.";
+    errors.primary_contact_phone = "Enter the contact phone number.";
   }
-  return "";
+
+  return errors;
 }
 
 function validateRequirementForm(form) {
+  const errors = {};
+
   if (!form.hiring_role.trim()) {
-    return "Enter the role title.";
+    errors.hiring_role = "Enter the role title.";
   }
   if (!String(form.openings).trim()) {
-    return "Enter the number of openings.";
+    errors.openings = "Enter the number of openings.";
   }
   if (!form.work_mode.trim()) {
-    return "Select the work mode.";
+    errors.work_mode = "Select the work mode.";
   }
   if (!form.location.trim()) {
-    return "Enter the work location.";
+    errors.location = "Enter the work location.";
   }
   if (!form.employment_type.trim()) {
-    return "Select the employment type.";
+    errors.employment_type = "Select the employment type.";
   }
   if (!form.joining_timeline.trim()) {
-    return "Select the joining timeline.";
+    errors.joining_timeline = "Select the joining timeline.";
   }
   if (!form.compensation.trim()) {
-    return "Enter the compensation range.";
+    errors.compensation = "Enter the compensation range.";
   }
   if (!form.experience.trim()) {
-    return "Enter the minimum experience required.";
+    errors.experience = "Enter the minimum experience required.";
   }
-  if (!form.must_have_skills.trim()) {
-    return "Add the must-have skills.";
+
+  return errors;
+}
+
+function hasFieldErrors(errors) {
+  return Object.keys(errors).length > 0;
+}
+
+function getFirstFieldError(errors) {
+  return Object.values(errors)[0] ?? "";
+}
+
+function getFieldGroupClassName(hasError, extraClassName = "") {
+  return [extraClassName, hasError ? "is-invalid" : ""].filter(Boolean).join(" ");
+}
+
+function renderFieldError(message) {
+  if (!message) {
+    return null;
   }
-  return "";
+
+  return (
+    <span className="employer-field-error" role="alert">
+      {message}
+    </span>
+  );
 }
 
 function splitCommaValues(value) {
@@ -546,6 +577,8 @@ function EmployerProfileStep({
   setForm,
   authUserId,
   email,
+  fieldErrors,
+  setFieldErrors,
   onCompanyLogoPick,
   onProfilePhotoPick,
   onRemoveCompanyLogo,
@@ -585,6 +618,15 @@ function EmployerProfileStep({
   function updateField(key, value) {
     setError("");
     setMessage("");
+    setFieldErrors((current) => {
+      if (!current[key]) {
+        return current;
+      }
+
+      const nextErrors = { ...current };
+      delete nextErrors[key];
+      return nextErrors;
+    });
     setForm((current) => ({ ...current, [key]: value }));
   }
 
@@ -682,11 +724,12 @@ function EmployerProfileStep({
           </div>
 
           <div className="employer-form-grid">
-            <label>
+            <label className={getFieldGroupClassName(Boolean(fieldErrors.company_name))}>
               <span className="employer-label-text">Company / Organization Name <span>*</span></span>
               <input onChange={(event) => updateField("company_name", event.target.value)} value={form.company_name} />
+              {renderFieldError(fieldErrors.company_name)}
             </label>
-            <label>
+            <label className={getFieldGroupClassName(Boolean(fieldErrors.industry))}>
               <span className="employer-label-text">Industry <span>*</span></span>
               <select onChange={(event) => updateField("industry", event.target.value)} value={form.industry}>
                 <option value="">Select industry</option>
@@ -696,8 +739,9 @@ function EmployerProfileStep({
                   </option>
                 ))}
               </select>
+              {renderFieldError(fieldErrors.industry)}
             </label>
-            <label>
+            <label className={getFieldGroupClassName(Boolean(fieldErrors.company_size))}>
               <span className="employer-label-text">Company Size <span>*</span></span>
               <select onChange={(event) => updateField("company_size", event.target.value)} value={form.company_size}>
                 <option value="">Select company size</option>
@@ -707,12 +751,13 @@ function EmployerProfileStep({
                   </option>
                 ))}
               </select>
+              {renderFieldError(fieldErrors.company_size)}
             </label>
           </div>
 
-          <label className="employer-wide-field employer-locations-field">
+          <label className={getFieldGroupClassName(Boolean(fieldErrors.locations), "employer-wide-field employer-locations-field")}>
             <span className="employer-label-text">Primary Hiring Locations <span>*</span></span>
-            <div className="employer-location-box">
+            <div className={`employer-location-box ${fieldErrors.locations ? "is-invalid" : ""}`}>
               <div className="employer-location-tags">
                 {locationTags.map((tag) => (
                   <span className="employer-location-tag" key={tag}>
@@ -732,19 +777,22 @@ function EmployerProfileStep({
                 />
               </div>
             </div>
+            {renderFieldError(fieldErrors.locations)}
             <div className="employer-field-note">Add all major locations where you hire.</div>
           </label>
 
           <div className="employer-form-grid">
-            <label>
+            <label className={getFieldGroupClassName(Boolean(fieldErrors.employee_count))}>
               <span className="employer-label-text">Total Employees <span>*</span></span>
               <input onChange={(event) => updateField("employee_count", event.target.value)} value={form.employee_count} />
+              {renderFieldError(fieldErrors.employee_count)}
             </label>
-            <label>
+            <label className={getFieldGroupClassName(Boolean(fieldErrors.hiring_team_size))}>
               <span className="employer-label-text">Hiring Team Size <span>*</span></span>
               <input onChange={(event) => updateField("hiring_team_size", event.target.value)} value={form.hiring_team_size} />
+              {renderFieldError(fieldErrors.hiring_team_size)}
             </label>
-            <label>
+            <label className={getFieldGroupClassName(Boolean(fieldErrors.monthly_hiring_volume))}>
               <span className="employer-label-text">Monthly Hiring Volume <span>*</span></span>
               <select onChange={(event) => updateField("monthly_hiring_volume", event.target.value)} value={form.monthly_hiring_volume}>
                 <option value="">Select monthly hiring volume</option>
@@ -754,21 +802,25 @@ function EmployerProfileStep({
                   </option>
                 ))}
               </select>
+              {renderFieldError(fieldErrors.monthly_hiring_volume)}
             </label>
           </div>
 
           <div className="employer-form-grid">
-            <label>
+            <label className={getFieldGroupClassName(Boolean(fieldErrors.primary_contact_name))}>
               <span className="employer-label-text">Primary Contact Name <span>*</span></span>
               <input onChange={(event) => updateField("primary_contact_name", event.target.value)} value={form.primary_contact_name} />
+              {renderFieldError(fieldErrors.primary_contact_name)}
             </label>
-            <label>
+            <label className={getFieldGroupClassName(Boolean(fieldErrors.primary_contact_email))}>
               <span className="employer-label-text">Work Email <span>*</span></span>
               <input onChange={(event) => updateField("primary_contact_email", event.target.value)} type="email" value={form.primary_contact_email} />
+              {renderFieldError(fieldErrors.primary_contact_email)}
             </label>
-            <label>
+            <label className={getFieldGroupClassName(Boolean(fieldErrors.primary_contact_phone))}>
               <span className="employer-label-text">Phone Number <span>*</span></span>
               <input onChange={(event) => updateField("primary_contact_phone", event.target.value)} value={form.primary_contact_phone} />
+              {renderFieldError(fieldErrors.primary_contact_phone)}
             </label>
           </div>
 
@@ -793,21 +845,7 @@ function EmployerProfileStep({
   );
 }
 
-function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessage }) {
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(getRequirementStorageKey(authUserId));
-      if (!saved) {
-        return;
-      }
-      const parsed = JSON.parse(saved);
-      setForm((current) => ({ ...current, ...parsed }));
-      setMessage("Loaded your saved requirement draft.");
-    } catch {
-      setMessage("");
-    }
-  }, [authUserId, setForm, setMessage]);
-
+function EmployerRequirementStep({ form, setForm, authUserId, fieldErrors, setFieldErrors, setError, setMessage }) {
   const completionPercent = useMemo(() => {
     const completed = requirementFields.filter((field) => String(form[field] ?? "").trim()).length;
     return Math.round((completed / requirementFields.length) * 100);
@@ -816,6 +854,15 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
   function updateField(key, value) {
     setError("");
     setMessage("");
+    setFieldErrors((current) => {
+      if (!current[key]) {
+        return current;
+      }
+
+      const nextErrors = { ...current };
+      delete nextErrors[key];
+      return nextErrors;
+    });
     setForm((current) => ({ ...current, [key]: value }));
   }
 
@@ -855,19 +902,21 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
               <div className="employer-section-badge">Step 1</div>
             </div>
             <div className="employer-form-grid">
-              <label>
+              <label className={getFieldGroupClassName(Boolean(fieldErrors.hiring_role))}>
                 <span className="employer-label-text">Role Title <span>*</span></span>
                 <input onChange={(event) => updateField("hiring_role", event.target.value)} value={form.hiring_role} />
+                {renderFieldError(fieldErrors.hiring_role)}
               </label>
-              <label>
+              <label className={getFieldGroupClassName(Boolean(fieldErrors.openings))}>
                 <span className="employer-label-text">Number of Openings <span>*</span></span>
                 <input min="1" onChange={(event) => updateField("openings", event.target.value)} type="number" value={form.openings} />
+                {renderFieldError(fieldErrors.openings)}
               </label>
               <label>
                 <span className="employer-label-text">Department</span>
                 <input onChange={(event) => updateField("department", event.target.value)} value={form.department} />
               </label>
-              <label>
+              <label className={getFieldGroupClassName(Boolean(fieldErrors.work_mode))}>
                 <span className="employer-label-text">Work Mode <span>*</span></span>
                 <select onChange={(event) => updateField("work_mode", event.target.value)} value={form.work_mode}>
                   <option value="">Select work mode</option>
@@ -877,12 +926,14 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
                     </option>
                   ))}
                 </select>
+                {renderFieldError(fieldErrors.work_mode)}
               </label>
-              <label>
+              <label className={getFieldGroupClassName(Boolean(fieldErrors.location))}>
                 <span className="employer-label-text">Location <span>*</span></span>
                 <input onChange={(event) => updateField("location", event.target.value)} value={form.location} />
+                {renderFieldError(fieldErrors.location)}
               </label>
-              <label>
+              <label className={getFieldGroupClassName(Boolean(fieldErrors.employment_type))}>
                 <span className="employer-label-text">Employment Type <span>*</span></span>
                 <select onChange={(event) => updateField("employment_type", event.target.value)} value={form.employment_type}>
                   <option value="">Select employment type</option>
@@ -892,6 +943,7 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
                     </option>
                   ))}
                 </select>
+                {renderFieldError(fieldErrors.employment_type)}
               </label>
             </div>
           </section>
@@ -907,7 +959,7 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
               <div className="employer-section-badge">Step 2</div>
             </div>
             <div className="employer-form-grid employer-form-grid-tight">
-              <label>
+              <label className={getFieldGroupClassName(Boolean(fieldErrors.joining_timeline))}>
                 <span className="employer-label-text">Joining Timeline <span>*</span></span>
                 <select onChange={(event) => updateField("joining_timeline", event.target.value)} value={form.joining_timeline}>
                   <option value="">Select joining timeline</option>
@@ -917,10 +969,12 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
                     </option>
                   ))}
                 </select>
+                {renderFieldError(fieldErrors.joining_timeline)}
               </label>
-              <label>
+              <label className={getFieldGroupClassName(Boolean(fieldErrors.compensation))}>
                 <span className="employer-label-text">Compensation Range <span>*</span></span>
                 <input onChange={(event) => updateField("compensation", event.target.value)} value={form.compensation} />
+                {renderFieldError(fieldErrors.compensation)}
               </label>
               <label>
                 <span className="employer-label-text">Hiring Priority</span>
@@ -933,9 +987,10 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
                   ))}
                 </select>
               </label>
-              <label>
+              <label className={getFieldGroupClassName(Boolean(fieldErrors.experience))}>
                 <span className="employer-label-text">Minimum Experience <span>*</span></span>
                 <input onChange={(event) => updateField("experience", event.target.value)} value={form.experience} />
+                {renderFieldError(fieldErrors.experience)}
               </label>
             </div>
           </section>
@@ -950,9 +1005,10 @@ function EmployerRequirementStep({ form, setForm, authUserId, setError, setMessa
               </div>
               <div className="employer-section-badge">Step 3</div>
             </div>
-            <label className="employer-wide-field">
-              <span className="employer-label-text">Must-Have Skills <span>*</span></span>
+            <label className={getFieldGroupClassName(Boolean(fieldErrors.must_have_skills), "employer-wide-field")}>
+              <span className="employer-label-text">Must-Have Skills</span>
               <textarea onChange={(event) => updateField("must_have_skills", event.target.value)} rows="3" value={form.must_have_skills} />
+              {renderFieldError(fieldErrors.must_have_skills)}
               <div className="employer-field-note">Use commas to separate skills so we can structure them more clearly.</div>
             </label>
             {mustHaveSkills.length ? (
@@ -1183,22 +1239,26 @@ export default function App() {
   const companyLogoInputRef = useRef(null);
   const profilePhotoInputRef = useRef(null);
   const authUserIdRef = useRef(null);
-  const [session, setSession] = useState(null);
-  const [isChecking, setIsChecking] = useState(true);
-  const [isSessionResolved, setIsSessionResolved] = useState(false);
-  const [error, setError] = useState("");
-  const [hasRoleAccess, setHasRoleAccess] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAgentLoading, setIsAgentLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile");
-  const [agentMessages, setAgentMessages] = useState([
+  const initialAgentMessages = useRef([
     {
       role: "assistant",
       content:
         "Tell me about the role you need to hire for, and I’ll turn it into a structured hiring brief.",
     },
   ]);
+  const [session, setSession] = useState(null);
+  const [isChecking, setIsChecking] = useState(true);
+  const [isSessionResolved, setIsSessionResolved] = useState(false);
+  const [hasHydratedEmployerState, setHasHydratedEmployerState] = useState(false);
+  const [error, setError] = useState("");
+  const [hasRoleAccess, setHasRoleAccess] = useState(false);
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAgentLoading, setIsAgentLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile");
+  const [profileFieldErrors, setProfileFieldErrors] = useState({});
+  const [requirementFieldErrors, setRequirementFieldErrors] = useState({});
+  const [agentMessages, setAgentMessages] = useState(initialAgentMessages.current);
   const [agentMissingFields, setAgentMissingFields] = useState([]);
   const [agentReadyToReview, setAgentReadyToReview] = useState(false);
   const [profileForm, setProfileForm] = useState({
@@ -1309,6 +1369,82 @@ export default function App() {
     verifyEmployerRole();
   }, [isSessionResolved, session?.user?.email, session?.user?.id]);
 
+  useEffect(() => {
+    if (!session?.user?.id || !hasRoleAccess) {
+      setHasHydratedEmployerState(false);
+      setAgentMessages(initialAgentMessages.current);
+      setAgentMissingFields([]);
+      setAgentReadyToReview(false);
+      return;
+    }
+
+    try {
+      const savedRequirement = window.localStorage.getItem(getRequirementStorageKey(session.user.id));
+      if (savedRequirement) {
+        const parsedRequirement = JSON.parse(savedRequirement);
+        setRequirementForm((current) => ({ ...current, ...parsedRequirement }));
+      }
+
+      const savedAgentState = window.localStorage.getItem(getRequirementAgentStorageKey(session.user.id));
+      if (savedAgentState) {
+        const parsedAgentState = JSON.parse(savedAgentState);
+        const nextMessages = Array.isArray(parsedAgentState.messages)
+          ? parsedAgentState.messages.filter(
+              (item) => item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string",
+            )
+          : [];
+
+        setAgentMessages(nextMessages.length ? nextMessages : initialAgentMessages.current);
+        setAgentMissingFields(
+          Array.isArray(parsedAgentState.missingFields)
+            ? parsedAgentState.missingFields.filter((item) => typeof item === "string" && item.trim())
+            : [],
+        );
+        setAgentReadyToReview(Boolean(parsedAgentState.readyToReview));
+      } else {
+        setAgentMessages(initialAgentMessages.current);
+        setAgentMissingFields([]);
+        setAgentReadyToReview(false);
+      }
+    } catch {
+      setAgentMessages(initialAgentMessages.current);
+      setAgentMissingFields([]);
+      setAgentReadyToReview(false);
+    } finally {
+      setHasHydratedEmployerState(true);
+    }
+  }, [hasRoleAccess, session?.user?.id]);
+
+  useEffect(() => {
+    if (!session?.user?.id || !hasRoleAccess || !hasHydratedEmployerState) {
+      return;
+    }
+
+    window.localStorage.setItem(getRequirementStorageKey(session.user.id), JSON.stringify(requirementForm));
+  }, [hasHydratedEmployerState, hasRoleAccess, requirementForm, session?.user?.id]);
+
+  useEffect(() => {
+    if (!session?.user?.id || !hasRoleAccess || !hasHydratedEmployerState) {
+      return;
+    }
+
+    window.localStorage.setItem(
+      getRequirementAgentStorageKey(session.user.id),
+      JSON.stringify({
+        messages: agentMessages,
+        missingFields: agentMissingFields,
+        readyToReview: agentReadyToReview,
+      }),
+    );
+  }, [
+    agentMessages,
+    agentMissingFields,
+    agentReadyToReview,
+    hasHydratedEmployerState,
+    hasRoleAccess,
+    session?.user?.id,
+  ]);
+
   async function handleSignOut() {
     await supabase.auth.signOut();
   }
@@ -1388,33 +1524,45 @@ export default function App() {
   }
 
   function saveProfileDraft() {
-    const validationError = validateEmployerProfile(profileForm);
-    if (validationError) {
-      setError(validationError);
+    const validationErrors = validateEmployerProfile(profileForm);
+    setProfileFieldErrors(validationErrors);
+    if (hasFieldErrors(validationErrors)) {
+      setError("");
+      setMessage("");
       return false;
     }
     window.localStorage.setItem(getProfileStorageKey(session.user.id), JSON.stringify(profileForm));
     setMessage("Profile saved. You can continue to requirements when ready.");
     setError("");
+    setProfileFieldErrors({});
     return true;
   }
 
   function saveRequirementDraft() {
-    const validationError = validateRequirementForm(requirementForm);
-    if (validationError) {
-      setError(validationError);
+    const validationErrors = validateRequirementForm(requirementForm);
+    setRequirementFieldErrors(validationErrors);
+    if (hasFieldErrors(validationErrors)) {
+      setError("");
+      setMessage("");
       return false;
     }
     window.localStorage.setItem(getRequirementStorageKey(session.user.id), JSON.stringify(requirementForm));
     setMessage("Requirement draft saved.");
     setError("");
+    setRequirementFieldErrors({});
     return true;
   }
 
   async function handlePublishEvaluation() {
     const profileOk = saveProfileDraft();
+    if (!profileOk) {
+      setActiveTab("profile");
+      return;
+    }
+
     const requirementOk = saveRequirementDraft();
-    if (!profileOk || !requirementOk) {
+    if (!requirementOk) {
+      setActiveTab("requirements");
       return;
     }
 
@@ -1536,12 +1684,14 @@ export default function App() {
           <EmployerProfileStep
             authUserId={session.user.id}
             email={session.user.email ?? ""}
+            fieldErrors={profileFieldErrors}
             form={profileForm}
             onCompanyLogoPick={() => handlePhotoPick(companyLogoInputRef)}
             onProfilePhotoPick={() => handlePhotoPick(profilePhotoInputRef)}
             onRemoveCompanyLogo={() => removeImage("company_logo_url")}
             onRemoveProfilePhoto={() => removeImage("profile_photo_url")}
             setError={setError}
+            setFieldErrors={setProfileFieldErrors}
             setForm={setProfileForm}
             setMessage={setMessage}
           />
@@ -1558,8 +1708,10 @@ export default function App() {
             />
             <EmployerRequirementStep
               authUserId={session.user.id}
+              fieldErrors={requirementFieldErrors}
               form={requirementForm}
               setError={setError}
+              setFieldErrors={setRequirementFieldErrors}
               setForm={setRequirementForm}
               setMessage={setMessage}
             />
