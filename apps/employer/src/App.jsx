@@ -72,39 +72,28 @@ function getRequirementAgentStorageKey(authUserId) {
   return `turant_hire_employer_requirement_agent_${authUserId}`;
 }
 
+function getEmployerIntroMessage(profileForm) {
+  if (!profileForm.primary_contact_name.trim()) {
+    return "Hi, I’m here to help you hire fast. What should I call you?";
+  }
+  if (!profileForm.business_type.trim()) {
+    return `Thanks ${profileForm.primary_contact_name.split(" ")[0]}. What kind of business do you run?`;
+  }
+  return "Who do you need to hire right now? You can describe it in one line and I’ll prepare the draft with you.";
+}
+
+function getEmployerConversationStage(profileForm) {
+  if (!profileForm.primary_contact_name.trim()) {
+    return "collect_name";
+  }
+  if (!profileForm.business_type.trim()) {
+    return "collect_business_type";
+  }
+  return "role_intake";
+}
+
 function validateEmployerProfile(form) {
   const errors = {};
-
-  if (!form.company_name.trim()) {
-    errors.company_name = "Enter your company or organization name.";
-  }
-  if (!form.industry.trim()) {
-    errors.industry = "Select your industry.";
-  }
-  if (!form.company_size.trim()) {
-    errors.company_size = "Select your company size.";
-  }
-  if (!form.locations.trim()) {
-    errors.locations = "Add at least one hiring location.";
-  }
-  if (!form.employee_count.trim()) {
-    errors.employee_count = "Enter your total employee count.";
-  }
-  if (!form.hiring_team_size.trim()) {
-    errors.hiring_team_size = "Enter your hiring team size.";
-  }
-  if (!form.monthly_hiring_volume.trim()) {
-    errors.monthly_hiring_volume = "Select your monthly hiring volume.";
-  }
-  if (!form.primary_contact_name.trim()) {
-    errors.primary_contact_name = "Enter the primary contact name.";
-  }
-  if (!form.primary_contact_email.trim()) {
-    errors.primary_contact_email = "Enter the work email.";
-  }
-  if (!form.primary_contact_phone.trim()) {
-    errors.primary_contact_phone = "Enter the contact phone number.";
-  }
 
   return errors;
 }
@@ -115,26 +104,14 @@ function validateRequirementForm(form) {
   if (!form.hiring_role.trim()) {
     errors.hiring_role = "Enter the role title.";
   }
-  if (!String(form.openings).trim()) {
-    errors.openings = "Enter the number of openings.";
-  }
-  if (!form.work_mode.trim()) {
-    errors.work_mode = "Select the work mode.";
-  }
   if (!form.location.trim()) {
     errors.location = "Enter the work location.";
-  }
-  if (!form.employment_type.trim()) {
-    errors.employment_type = "Select the employment type.";
   }
   if (!form.joining_timeline.trim()) {
     errors.joining_timeline = "Select the joining timeline.";
   }
   if (!form.compensation.trim()) {
     errors.compensation = "Enter the compensation range.";
-  }
-  if (!form.experience.trim()) {
-    errors.experience = "Enter the minimum experience required.";
   }
 
   return errors;
@@ -204,9 +181,9 @@ function readImageFile(file) {
 
 function EmployerSidebar({ activeTab, onSupportClick, onTabChange }) {
   const items = [
-    { id: "profile", label: "Profile Setup", icon: "profile" },
-    { id: "requirements", label: "Hiring Requirements", icon: "briefcase" },
-    { id: "review", label: "Evaluation Pipeline", icon: "pipeline" },
+    { id: "requirements", label: "New Hiring Request", icon: "briefcase" },
+    { id: "review", label: "Draft Review", icon: "pipeline" },
+    { id: "profile", label: "Business Details", icon: "profile" },
   ];
 
   function renderIcon(type) {
@@ -315,9 +292,9 @@ function EmployerSidebar({ activeTab, onSupportClick, onTabChange }) {
 function TopBar({ companyLogoUrl, companyName, email, onAccountClick, onBellClick, onPhotoClick, onSignOut, profilePhotoUrl, step }) {
   const steps = [1, 2, 3];
   const titleMap = {
-    1: "Profile Setup",
-    2: "Hiring Requirements",
-    3: "Review & Start Evaluation",
+    1: "New Hiring Request",
+    2: "Draft Review",
+    3: "Business Details",
   };
 
   return (
@@ -332,9 +309,9 @@ function TopBar({ companyLogoUrl, companyName, email, onAccountClick, onBellClic
             </div>
           ))}
           <span className="employer-step-copy">
-            {step === 1 && "Complete your profile to start defining hiring needs"}
-            {step === 2 && "Define what success looks like for this role"}
-            {step === 3 && "Review the screening blueprint before evaluation starts"}
+            {step === 1 && "Start with a simple conversation about who you need to hire"}
+            {step === 2 && "Review the draft before we start matching and screening"}
+            {step === 3 && "Add optional business details if you want a richer setup later"}
           </span>
         </div>
       </div>
@@ -572,6 +549,82 @@ function ReviewHelperCard() {
   );
 }
 
+function QuickHiringDraftCard({
+  businessType,
+  companyName,
+  employerName,
+  onEditDetails,
+  onReviewDraft,
+  readyToReview,
+  requirementForm,
+  showEditDetails,
+}) {
+  const snapshotItems = [
+    ["Role", requirementForm.hiring_role],
+    ["Openings", requirementForm.openings || "1"],
+    ["Location", requirementForm.location],
+    ["Urgency", requirementForm.joining_timeline],
+    ["Pay", requirementForm.compensation],
+  ];
+  const completedItems = snapshotItems.filter(([, value]) => String(value || "").trim()).length;
+  const headline = requirementForm.hiring_role
+    ? `Draft for ${requirementForm.hiring_role}`
+    : "Your hiring draft will appear here";
+
+  return (
+    <aside className="employer-matters-card employer-quick-draft-card">
+      <div className="employer-matters-head">
+        <div className="employer-matters-head-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 20h16" />
+            <path d="M7 17V8" />
+            <path d="M12 17V4" />
+            <path d="M17 17v-6" />
+          </svg>
+        </div>
+        <div>
+          <h3>{headline}</h3>
+          <p>
+            {employerName ? `${employerName}, ` : ""}
+            {companyName || businessType || "your business"} can keep this light. We only need enough detail to start hiring fast.
+          </p>
+        </div>
+      </div>
+
+      <div className="employer-quality-meter employer-quick-draft-meter">
+        <div className="employer-quality-meter-top">
+          <span>Draft progress</span>
+          <strong>{completedItems}/5</strong>
+        </div>
+        <div className="employer-quality-bar">
+          <div className="employer-quality-fill" style={{ width: `${(completedItems / snapshotItems.length) * 100}%` }} />
+        </div>
+        <div className="employer-quality-meter-note">
+          {readyToReview ? "Enough detail to move ahead" : "Answer a few short questions to finish the draft"}
+        </div>
+      </div>
+
+      <div className="employer-summary-grid employer-summary-grid-compact">
+        {snapshotItems.map(([label, value]) => (
+          <div className="employer-summary-item" key={label}>
+            <span>{label}</span>
+            <strong>{value || "Waiting..."}</strong>
+          </div>
+        ))}
+      </div>
+
+      <div className="employer-branding-actions employer-quick-draft-actions">
+        <button className="employer-plain-action employer-small-action" onClick={onEditDetails} type="button">
+          {showEditDetails ? "Hide details form" : "Edit full details"}
+        </button>
+        <button className="employer-support-button employer-quick-review-button" onClick={onReviewDraft} type="button">
+          Review draft
+        </button>
+      </div>
+    </aside>
+  );
+}
+
 function EmployerProfileStep({
   form,
   setForm,
@@ -587,24 +640,6 @@ function EmployerProfileStep({
   setMessage,
 }) {
   const [locationInput, setLocationInput] = useState("");
-
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(getProfileStorageKey(authUserId));
-      if (!saved) {
-        return;
-      }
-      const parsed = JSON.parse(saved);
-      setForm((current) => ({
-        ...current,
-        ...parsed,
-        primary_contact_email: parsed.primary_contact_email || email,
-      }));
-      setMessage("Loaded your saved employer profile.");
-    } catch {
-      setMessage("");
-    }
-  }, [authUserId, email, setForm, setMessage]);
 
   const locationTags = useMemo(
     () =>
@@ -720,17 +755,35 @@ function EmployerProfileStep({
                 <path d="M11 5.5A1.5 1.5 0 0 1 12.5 4H16a1.5 1.5 0 0 1 1.5 1.5V20" />
               </svg>
             </div>
-            <div className="employer-form-card-title">Company Information</div>
+            <div className="employer-form-card-title">Business Details</div>
+          </div>
+
+          <div className="employer-security-note employer-security-note-soft">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 20h9" />
+              <path d="M12 4h9" />
+              <path d="M4 9h16" />
+              <path d="M4 15h16" />
+            </svg>
+            <span>Everything on this page is optional now. Use it only if you want a richer employer profile.</span>
           </div>
 
           <div className="employer-form-grid">
             <label className={getFieldGroupClassName(Boolean(fieldErrors.company_name))}>
-              <span className="employer-label-text">Company / Organization Name <span>*</span></span>
+              <span className="employer-label-text">Company / Organization Name</span>
               <input onChange={(event) => updateField("company_name", event.target.value)} value={form.company_name} />
               {renderFieldError(fieldErrors.company_name)}
             </label>
+            <label>
+              <span className="employer-label-text">Business Type</span>
+              <input
+                onChange={(event) => updateField("business_type", event.target.value)}
+                placeholder="Cafe, bakery, restaurant, salon, retail shop..."
+                value={form.business_type}
+              />
+            </label>
             <label className={getFieldGroupClassName(Boolean(fieldErrors.industry))}>
-              <span className="employer-label-text">Industry <span>*</span></span>
+              <span className="employer-label-text">Industry</span>
               <select onChange={(event) => updateField("industry", event.target.value)} value={form.industry}>
                 <option value="">Select industry</option>
                 {industryOptions.map((option) => (
@@ -742,7 +795,7 @@ function EmployerProfileStep({
               {renderFieldError(fieldErrors.industry)}
             </label>
             <label className={getFieldGroupClassName(Boolean(fieldErrors.company_size))}>
-              <span className="employer-label-text">Company Size <span>*</span></span>
+              <span className="employer-label-text">Company Size</span>
               <select onChange={(event) => updateField("company_size", event.target.value)} value={form.company_size}>
                 <option value="">Select company size</option>
                 {companySizeOptions.map((option) => (
@@ -756,7 +809,7 @@ function EmployerProfileStep({
           </div>
 
           <label className={getFieldGroupClassName(Boolean(fieldErrors.locations), "employer-wide-field employer-locations-field")}>
-            <span className="employer-label-text">Primary Hiring Locations <span>*</span></span>
+            <span className="employer-label-text">Primary Hiring Locations</span>
             <div className={`employer-location-box ${fieldErrors.locations ? "is-invalid" : ""}`}>
               <div className="employer-location-tags">
                 {locationTags.map((tag) => (
@@ -783,17 +836,17 @@ function EmployerProfileStep({
 
           <div className="employer-form-grid">
             <label className={getFieldGroupClassName(Boolean(fieldErrors.employee_count))}>
-              <span className="employer-label-text">Total Employees <span>*</span></span>
+              <span className="employer-label-text">Total Employees</span>
               <input onChange={(event) => updateField("employee_count", event.target.value)} value={form.employee_count} />
               {renderFieldError(fieldErrors.employee_count)}
             </label>
             <label className={getFieldGroupClassName(Boolean(fieldErrors.hiring_team_size))}>
-              <span className="employer-label-text">Hiring Team Size <span>*</span></span>
+              <span className="employer-label-text">Hiring Team Size</span>
               <input onChange={(event) => updateField("hiring_team_size", event.target.value)} value={form.hiring_team_size} />
               {renderFieldError(fieldErrors.hiring_team_size)}
             </label>
             <label className={getFieldGroupClassName(Boolean(fieldErrors.monthly_hiring_volume))}>
-              <span className="employer-label-text">Monthly Hiring Volume <span>*</span></span>
+              <span className="employer-label-text">Monthly Hiring Volume</span>
               <select onChange={(event) => updateField("monthly_hiring_volume", event.target.value)} value={form.monthly_hiring_volume}>
                 <option value="">Select monthly hiring volume</option>
                 {hiringVolumeOptions.map((option) => (
@@ -808,17 +861,17 @@ function EmployerProfileStep({
 
           <div className="employer-form-grid">
             <label className={getFieldGroupClassName(Boolean(fieldErrors.primary_contact_name))}>
-              <span className="employer-label-text">Primary Contact Name <span>*</span></span>
+              <span className="employer-label-text">Primary Contact Name</span>
               <input onChange={(event) => updateField("primary_contact_name", event.target.value)} value={form.primary_contact_name} />
               {renderFieldError(fieldErrors.primary_contact_name)}
             </label>
             <label className={getFieldGroupClassName(Boolean(fieldErrors.primary_contact_email))}>
-              <span className="employer-label-text">Work Email <span>*</span></span>
+              <span className="employer-label-text">Work Email</span>
               <input onChange={(event) => updateField("primary_contact_email", event.target.value)} type="email" value={form.primary_contact_email} />
               {renderFieldError(fieldErrors.primary_contact_email)}
             </label>
             <label className={getFieldGroupClassName(Boolean(fieldErrors.primary_contact_phone))}>
-              <span className="employer-label-text">Phone Number <span>*</span></span>
+              <span className="employer-label-text">Phone Number</span>
               <input onChange={(event) => updateField("primary_contact_phone", event.target.value)} value={form.primary_contact_phone} />
               {renderFieldError(fieldErrors.primary_contact_phone)}
             </label>
@@ -873,8 +926,8 @@ function EmployerRequirementStep({ form, setForm, authUserId, fieldErrors, setFi
   return (
     <>
       <div className="employer-page-heading">
-        <h1>Create a hiring requirement</h1>
-        <p>Define what success looks like for this role so our screening agents can evaluate the right candidates.</p>
+        <h1>Edit the full draft only if you need to</h1>
+        <p>The chat should do most of the work. Use this form when you want to add or correct details manually.</p>
       </div>
 
       <div className="employer-content-grid">
@@ -908,7 +961,7 @@ function EmployerRequirementStep({ form, setForm, authUserId, fieldErrors, setFi
                 {renderFieldError(fieldErrors.hiring_role)}
               </label>
               <label className={getFieldGroupClassName(Boolean(fieldErrors.openings))}>
-                <span className="employer-label-text">Number of Openings <span>*</span></span>
+                <span className="employer-label-text">Number of Openings</span>
                 <input min="1" onChange={(event) => updateField("openings", event.target.value)} type="number" value={form.openings} />
                 {renderFieldError(fieldErrors.openings)}
               </label>
@@ -917,7 +970,7 @@ function EmployerRequirementStep({ form, setForm, authUserId, fieldErrors, setFi
                 <input onChange={(event) => updateField("department", event.target.value)} value={form.department} />
               </label>
               <label className={getFieldGroupClassName(Boolean(fieldErrors.work_mode))}>
-                <span className="employer-label-text">Work Mode <span>*</span></span>
+                <span className="employer-label-text">Work Mode</span>
                 <select onChange={(event) => updateField("work_mode", event.target.value)} value={form.work_mode}>
                   <option value="">Select work mode</option>
                   {workModeOptions.map((option) => (
@@ -934,7 +987,7 @@ function EmployerRequirementStep({ form, setForm, authUserId, fieldErrors, setFi
                 {renderFieldError(fieldErrors.location)}
               </label>
               <label className={getFieldGroupClassName(Boolean(fieldErrors.employment_type))}>
-                <span className="employer-label-text">Employment Type <span>*</span></span>
+                <span className="employer-label-text">Employment Type</span>
                 <select onChange={(event) => updateField("employment_type", event.target.value)} value={form.employment_type}>
                   <option value="">Select employment type</option>
                   {employmentTypeOptions.map((option) => (
@@ -988,7 +1041,7 @@ function EmployerRequirementStep({ form, setForm, authUserId, fieldErrors, setFi
                 </select>
               </label>
               <label className={getFieldGroupClassName(Boolean(fieldErrors.experience))}>
-                <span className="employer-label-text">Minimum Experience <span>*</span></span>
+                <span className="employer-label-text">Minimum Experience</span>
                 <input onChange={(event) => updateField("experience", event.target.value)} value={form.experience} />
                 {renderFieldError(fieldErrors.experience)}
               </label>
@@ -1105,7 +1158,7 @@ function EmployerReviewStep({ profileForm, requirementForm }) {
   const disqualifiers = splitLineValues(requirementForm.disqualifiers);
   const summaryItems = [
     ["Role title", requirementForm.hiring_role],
-    ["Openings", requirementForm.openings],
+    ["Openings", requirementForm.openings || "1"],
     ["Location", requirementForm.location],
     ["Work mode", requirementForm.work_mode],
     ["Employment type", requirementForm.employment_type],
@@ -1139,7 +1192,7 @@ function EmployerReviewStep({ profileForm, requirementForm }) {
               <div className="employer-summary-eyebrow">Evaluation brief</div>
               <div className="employer-summary-title">{requirementForm.hiring_role || "Role title"}</div>
               <div className="employer-summary-subtitle">
-                {profileForm.company_name || "Company"} · {requirementForm.location || "Location"} · {requirementForm.openings} opening(s)
+                {profileForm.company_name || profileForm.business_type || "Company"} · {requirementForm.location || "Location"} · {requirementForm.openings || "1"} opening(s)
               </div>
             </div>
             <div className="employer-summary-badge">Ready for evaluation</div>
@@ -1242,8 +1295,7 @@ export default function App() {
   const initialAgentMessages = useRef([
     {
       role: "assistant",
-      content:
-        "Tell me about the role you need to hire for, and I’ll turn it into a structured hiring brief.",
+      content: "Hi, I’m here to help you hire fast. What should I call you?",
     },
   ]);
   const [session, setSession] = useState(null);
@@ -1255,7 +1307,8 @@ export default function App() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAgentLoading, setIsAgentLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useState("requirements");
+  const [showRequirementEditor, setShowRequirementEditor] = useState(false);
   const [profileFieldErrors, setProfileFieldErrors] = useState({});
   const [requirementFieldErrors, setRequirementFieldErrors] = useState({});
   const [agentMessages, setAgentMessages] = useState(initialAgentMessages.current);
@@ -1264,6 +1317,7 @@ export default function App() {
   const [profileForm, setProfileForm] = useState({
     company_logo_url: "",
     company_name: "",
+    business_type: "",
     industry: "",
     company_size: "",
     locations: "",
@@ -1372,13 +1426,29 @@ export default function App() {
   useEffect(() => {
     if (!session?.user?.id || !hasRoleAccess) {
       setHasHydratedEmployerState(false);
-      setAgentMessages(initialAgentMessages.current);
+      setAgentMessages([
+        {
+          role: "assistant",
+          content: getEmployerIntroMessage(profileForm),
+        },
+      ]);
       setAgentMissingFields([]);
       setAgentReadyToReview(false);
       return;
     }
 
     try {
+      const savedProfile = window.localStorage.getItem(getProfileStorageKey(session.user.id));
+      let hydratedProfile = null;
+      if (savedProfile) {
+        hydratedProfile = JSON.parse(savedProfile);
+        setProfileForm((current) => ({
+          ...current,
+          ...hydratedProfile,
+          primary_contact_email: hydratedProfile.primary_contact_email || current.primary_contact_email || session.user.email || "",
+        }));
+      }
+
       const savedRequirement = window.localStorage.getItem(getRequirementStorageKey(session.user.id));
       if (savedRequirement) {
         const parsedRequirement = JSON.parse(savedRequirement);
@@ -1402,18 +1472,41 @@ export default function App() {
         );
         setAgentReadyToReview(Boolean(parsedAgentState.readyToReview));
       } else {
-        setAgentMessages(initialAgentMessages.current);
+        setAgentMessages([
+          {
+            role: "assistant",
+            content: getEmployerIntroMessage({
+              ...profileForm,
+              ...(hydratedProfile || {}),
+              primary_contact_email:
+                hydratedProfile?.primary_contact_email || profileForm.primary_contact_email || session.user.email || "",
+            }),
+          },
+        ]);
         setAgentMissingFields([]);
         setAgentReadyToReview(false);
       }
     } catch {
-      setAgentMessages(initialAgentMessages.current);
+      setAgentMessages([
+        {
+          role: "assistant",
+          content: getEmployerIntroMessage(profileForm),
+        },
+      ]);
       setAgentMissingFields([]);
       setAgentReadyToReview(false);
     } finally {
       setHasHydratedEmployerState(true);
     }
-  }, [hasRoleAccess, session?.user?.id]);
+  }, [hasRoleAccess, session?.user?.email, session?.user?.id]);
+
+  useEffect(() => {
+    if (!session?.user?.id || !hasRoleAccess || !hasHydratedEmployerState) {
+      return;
+    }
+
+    window.localStorage.setItem(getProfileStorageKey(session.user.id), JSON.stringify(profileForm));
+  }, [hasHydratedEmployerState, hasRoleAccess, profileForm, session?.user?.id]);
 
   useEffect(() => {
     if (!session?.user?.id || !hasRoleAccess || !hasHydratedEmployerState) {
@@ -1455,7 +1548,7 @@ export default function App() {
 
   function handleAccountClick() {
     setActiveTab("profile");
-    setMessage("Showing your employer profile setup.");
+    setMessage("Showing optional business details.");
     setError("");
   }
 
@@ -1492,8 +1585,46 @@ export default function App() {
   async function handleEmployerAgentMessage(userContent) {
     const nextMessages = [...agentMessages, { role: "user", content: userContent }];
     setAgentMessages(nextMessages);
-    setIsAgentLoading(true);
     setError("");
+    setMessage("");
+
+    const trimmedContent = userContent.trim();
+    const conversationStage = getEmployerConversationStage(profileForm);
+
+    if (conversationStage === "collect_name") {
+      const firstName = trimmedContent.split(" ")[0];
+      setProfileForm((current) => ({
+        ...current,
+        primary_contact_name: trimmedContent,
+      }));
+      setAgentMessages([
+        ...nextMessages,
+        {
+          role: "assistant",
+          content: `Thanks ${firstName}. What kind of business do you run? You can say cafe, bakery, restaurant, retail shop, salon, or anything similar.`,
+        },
+      ]);
+      return;
+    }
+
+    if (conversationStage === "collect_business_type") {
+      setProfileForm((current) => ({
+        ...current,
+        business_type: trimmedContent,
+        company_name: current.company_name || trimmedContent,
+      }));
+      setAgentMessages([
+        ...nextMessages,
+        {
+          role: "assistant",
+          content:
+            "Got it. Who do you need to hire right now? You can describe it in one line, like \"I need 2 waiters for my Bandra cafe, evening shift, immediate joining.\"",
+        },
+      ]);
+      return;
+    }
+
+    setIsAgentLoading(true);
 
     try {
       const recentMessages = nextMessages.slice(-16);
@@ -1513,9 +1644,10 @@ export default function App() {
       setAgentReadyToReview(Boolean(response.ready_to_review));
       setRequirementForm((current) => ({
         ...current,
+        openings: current.openings || "1",
         ...response.structured_requirement,
       }));
-      setMessage("Employer agent updated your requirement draft.");
+      setMessage("Draft updated. Review it or keep chatting if you want to refine it.");
     } catch (nextError) {
       setError(nextError.message);
     } finally {
@@ -1532,7 +1664,7 @@ export default function App() {
       return false;
     }
     window.localStorage.setItem(getProfileStorageKey(session.user.id), JSON.stringify(profileForm));
-    setMessage("Profile saved. You can continue to requirements when ready.");
+    setMessage("Business details saved.");
     setError("");
     setProfileFieldErrors({});
     return true;
@@ -1574,12 +1706,12 @@ export default function App() {
       await createRequirement({
         employer_auth_user_id: session.user.id,
         employer_email: session.user.email ?? "",
-        company_name: profileForm.company_name,
+        company_name: profileForm.company_name || profileForm.business_type || "Employer",
         hiring_role: requirementForm.hiring_role,
         location: requirementForm.location,
         urgency: requirementForm.joining_timeline,
         compensation: requirementForm.compensation,
-        openings: Number(requirementForm.openings),
+        openings: Number(requirementForm.openings) || 1,
         notes: [
           `Department: ${requirementForm.department}`,
           `Work mode: ${requirementForm.work_mode}`,
@@ -1643,7 +1775,7 @@ export default function App() {
     );
   }
 
-  const step = activeTab === "profile" ? 1 : activeTab === "requirements" ? 2 : 3;
+  const step = activeTab === "requirements" ? 1 : activeTab === "review" ? 2 : 3;
 
   return (
     <div className="employer-layout">
@@ -1700,21 +1832,61 @@ export default function App() {
         {activeTab === "requirements" ? (
           <>
             <EmployerRequirementAgent
+              actionLabel="Continue"
+              heading="Tell me who you need to hire"
               isLoading={isAgentLoading}
               messages={agentMessages}
               missingFields={agentMissingFields}
               onSendMessage={handleEmployerAgentMessage}
+              placeholder="Example: I need 2 waiters for my Bandra cafe, evening shift, immediate joining."
+              statusCollectingLabel="Building draft"
+              statusReadyLabel="Draft ready"
+              subheading="Start with a few short replies. I’ll keep the intake light and build the hiring draft as we go."
+              tip="Keep it simple. Name, business type, role, area, urgency, shift, and pay are enough to get started."
               readyToReview={agentReadyToReview}
             />
-            <EmployerRequirementStep
-              authUserId={session.user.id}
-              fieldErrors={requirementFieldErrors}
-              form={requirementForm}
-              setError={setError}
-              setFieldErrors={setRequirementFieldErrors}
-              setForm={setRequirementForm}
-              setMessage={setMessage}
-            />
+            <div className="employer-content-grid employer-chat-grid">
+              <QuickHiringDraftCard
+                businessType={profileForm.business_type}
+                companyName={profileForm.company_name}
+                employerName={profileForm.primary_contact_name}
+                onEditDetails={() => setShowRequirementEditor((current) => !current)}
+                onReviewDraft={() => {
+                  if (saveRequirementDraft()) {
+                    setActiveTab("review");
+                  } else {
+                    setShowRequirementEditor(true);
+                  }
+                }}
+                readyToReview={agentReadyToReview}
+                requirementForm={requirementForm}
+                showEditDetails={showRequirementEditor}
+              />
+              <RequirementHelperCard
+                completionPercent={Math.round(
+                  ([
+                    requirementForm.hiring_role,
+                    requirementForm.location,
+                    requirementForm.joining_timeline,
+                    requirementForm.compensation,
+                    requirementForm.openings,
+                  ].filter(Boolean).length /
+                    5) *
+                    100,
+                )}
+              />
+            </div>
+            {showRequirementEditor ? (
+              <EmployerRequirementStep
+                authUserId={session.user.id}
+                fieldErrors={requirementFieldErrors}
+                form={requirementForm}
+                setError={setError}
+                setFieldErrors={setRequirementFieldErrors}
+                setForm={setRequirementForm}
+                setMessage={setMessage}
+              />
+            ) : null}
           </>
         ) : null}
 
@@ -1730,7 +1902,8 @@ export default function App() {
                 if (activeTab === "profile") {
                   saveProfileDraft();
                 } else if (activeTab === "requirements") {
-                  saveRequirementDraft();
+                  setMessage("Draft saved. You can continue later.");
+                  setError("");
                 } else {
                   const profileOk = saveProfileDraft();
                   const requirementOk = saveRequirementDraft();
@@ -1761,7 +1934,7 @@ export default function App() {
               </button>
             ) : (
               <button className="employer-plain-action" onClick={saveProfileDraft} type="button">
-                Save Profile
+                Save Business Details
               </button>
             )}
 
@@ -1775,7 +1948,7 @@ export default function App() {
                 }}
                 type="button"
               >
-                Continue to Requirements
+                Back to Hiring Request
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14" />
                   <path d="m12 5 7 7-7 7" />
@@ -1789,11 +1962,13 @@ export default function App() {
                 onClick={() => {
                   if (saveRequirementDraft()) {
                     setActiveTab("review");
+                  } else {
+                    setShowRequirementEditor(true);
                   }
                 }}
                 type="button"
               >
-                Review Requirement
+                Review Draft
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14" />
                   <path d="m12 5 7 7-7 7" />

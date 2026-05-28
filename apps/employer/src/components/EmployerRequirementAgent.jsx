@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 
 export function EmployerRequirementAgent({
+  actionLabel = "Send",
+  heading = "Describe the role in your own words",
   messages,
   missingFields,
   onSendMessage,
+  placeholder = "Example: I need 3 waiters for our Bandra cafe, evening shift, immediate joining, salary around 18k.",
+  subheading = "I will turn your conversation into a structured hiring brief for matching.",
   readyToReview,
   isLoading,
+  statusCollectingLabel = "Collecting details",
+  statusReadyLabel = "Brief ready",
+  tip = "Tip: include role, openings, location, salary, shifts, and urgency.",
 }) {
   const [input, setInput] = useState("");
   const threadRef = useRef(null);
@@ -41,11 +48,11 @@ export function EmployerRequirementAgent({
       <div className="employer-agent-head">
         <div>
           <div className="employer-agent-kicker">Employer Agent</div>
-          <h3>Describe the role in your own words</h3>
-          <p>I will turn your conversation into a structured hiring brief for matching.</p>
+          <h3>{heading}</h3>
+          <p>{subheading}</p>
         </div>
         <div className={`employer-agent-status ${readyToReview ? "ready" : ""}`}>
-          {readyToReview ? "Brief ready" : "Collecting details"}
+          {readyToReview ? statusReadyLabel : statusCollectingLabel}
         </div>
       </div>
 
@@ -73,14 +80,14 @@ export function EmployerRequirementAgent({
           className="employer-agent-input"
           onKeyDown={handleKeyDown}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Example: I need 3 waiters for our Bandra cafe, evening shift, immediate joining, salary around 18k."
+          placeholder={placeholder}
           rows="3"
           value={input}
         />
         <div className="employer-agent-actions">
-          <span>Tip: include role, openings, location, salary, shifts, and urgency.</span>
+          <span>{tip}</span>
           <button className="employer-primary-action" disabled={isLoading || !input.trim()} type="submit">
-            {isLoading ? "Sending..." : "Send to Agent"}
+            {isLoading ? "Sending..." : actionLabel}
           </button>
         </div>
       </form>
