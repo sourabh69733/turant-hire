@@ -1040,6 +1040,16 @@ img {
   font-weight: 700;
 }
 
+.employer-danger-action {
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid #f3c7c2;
+  background: #fff7f6;
+  color: #b42318;
+  font-weight: 700;
+}
+
 .employer-bottom-note {
   color: #7f8897;
   font-size: 0.89rem;
@@ -1098,12 +1108,18 @@ img {
 }
 
 .employer-secondary-action:hover,
+.employer-danger-action:hover,
 .employer-plain-action:hover,
 .employer-account-chip:hover,
 .employer-signout-button:hover,
 .employer-support-button:hover {
   border-color: #d7c8b8;
   background: #fffaf5;
+}
+
+.employer-danger-action:hover {
+  border-color: #efb5ae;
+  background: #fff0ee;
 }
 
 .employer-support-button:hover {
@@ -1115,6 +1131,7 @@ img {
 }
 
 .employer-secondary-action,
+.employer-danger-action,
 .employer-plain-action,
 .employer-account-chip,
 .employer-signout-button,
@@ -1485,6 +1502,7 @@ img {
   }
 
   .employer-secondary-action,
+  .employer-danger-action,
   .employer-plain-action,
   .employer-primary-action,
   .employer-signout-button {

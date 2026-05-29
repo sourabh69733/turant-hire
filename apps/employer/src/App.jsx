@@ -1548,6 +1548,67 @@ export default function App() {
     return true;
   }
 
+  function clearSavedEmployerState() {
+    if (!session?.user?.id) {
+      return;
+    }
+
+    window.localStorage.removeItem(getProfileStorageKey(session.user.id));
+    window.localStorage.removeItem(getRequirementStorageKey(session.user.id));
+    window.localStorage.removeItem(getRequirementAgentStorageKey(session.user.id));
+
+    setProfileFieldErrors({});
+    setRequirementFieldErrors({});
+    setShowRequirementEditor(false);
+    setProfileForm((current) => ({
+      ...current,
+      company_logo_url: "",
+      company_name: "",
+      business_type: "",
+      industry: "",
+      company_size: "",
+      locations: "",
+      employee_count: "",
+      hiring_team_size: "",
+      monthly_hiring_volume: "",
+      primary_contact_name: "",
+      primary_contact_email: session.user.email ?? "",
+      primary_contact_phone: "",
+      profile_photo_url: "",
+      current_process_note: "",
+    }));
+    setRequirementForm({
+      hiring_role: "",
+      openings: "",
+      department: "",
+      work_mode: "",
+      location: "",
+      employment_type: "",
+      joining_timeline: "",
+      compensation: "",
+      priority: "",
+      experience: "",
+      must_have_skills: "",
+      language_requirements: "",
+      communication_expectation: "",
+      education_requirement: "",
+      screening_questions: "",
+      disqualifiers: "",
+      ideal_candidate_notes: "",
+    });
+    setAgentMessages([
+      {
+        role: "assistant",
+        content: "Hi, I’m here to help you hire fast. What should I call you?",
+      },
+    ]);
+    setAgentMissingFields([]);
+    setAgentReadyToReview(false);
+    setActiveTab("requirements");
+    setError("");
+    setMessage("Saved chat and draft cleared.");
+  }
+
   async function handlePublishEvaluation() {
     const profileOk = saveProfileDraft();
     if (!profileOk) {
@@ -1751,6 +1812,9 @@ export default function App() {
                 <path d="M14 3v6h6" />
               </svg>
               Save for Later
+            </button>
+            <button className="employer-danger-action" onClick={clearSavedEmployerState} type="button">
+              Clear Saved Draft
             </button>
             <span className="employer-bottom-note">You can complete this anytime.</span>
           </div>
