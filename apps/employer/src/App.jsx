@@ -446,60 +446,6 @@ function ProfileMatterCard() {
   );
 }
 
-function RequirementHelperCard({ completionPercent }) {
-  const readinessTone =
-    completionPercent >= 80 ? "High-confidence brief" : completionPercent >= 50 ? "Good working draft" : "Needs more structure";
-
-  return (
-    <aside className="employer-matters-card">
-      <div className="employer-matters-head">
-        <div className="employer-matters-head-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 12h16" />
-            <path d="M12 4v16" />
-          </svg>
-        </div>
-        <div>
-          <h3>Requirement Quality</h3>
-          <p>Structured requirements help our interview agents ask the right questions from the start.</p>
-        </div>
-      </div>
-
-      <div className="employer-quality-meter">
-        <div className="employer-quality-meter-top">
-          <span>Readiness</span>
-          <strong>{completionPercent}%</strong>
-        </div>
-        <div className="employer-quality-bar">
-          <div className="employer-quality-fill" style={{ width: `${completionPercent}%` }} />
-        </div>
-        <div className="employer-quality-meter-note">{readinessTone}</div>
-      </div>
-
-      <div className="employer-matters-list">
-        <div className="employer-matter-item">
-          <div className="employer-matter-icon">
-            <MatterIcon type="target" />
-          </div>
-          <div>
-            <strong>Role interpretation</strong>
-            <p>The platform converts this structure into a screening blueprint and evaluation logic.</p>
-          </div>
-        </div>
-        <div className="employer-matter-item">
-          <div className="employer-matter-icon">
-            <MatterIcon type="chart" />
-          </div>
-          <div>
-            <strong>What agents will evaluate</strong>
-            <p>Role fit, communication, availability, non-negotiables, and readiness for the final round.</p>
-          </div>
-        </div>
-      </div>
-    </aside>
-  );
-}
-
 function ReviewHelperCard() {
   return (
     <aside className="employer-matters-card">
@@ -544,82 +490,6 @@ function ReviewHelperCard() {
             <p>Your requirement is locked into a consistent evaluation brief before any agent-led interview begins.</p>
           </div>
         </div>
-      </div>
-    </aside>
-  );
-}
-
-function QuickHiringDraftCard({
-  businessType,
-  companyName,
-  employerName,
-  onEditDetails,
-  onReviewDraft,
-  readyToReview,
-  requirementForm,
-  showEditDetails,
-}) {
-  const snapshotItems = [
-    ["Role", requirementForm.hiring_role],
-    ["Openings", requirementForm.openings || "1"],
-    ["Location", requirementForm.location],
-    ["Urgency", requirementForm.joining_timeline],
-    ["Pay", requirementForm.compensation],
-  ];
-  const completedItems = snapshotItems.filter(([, value]) => String(value || "").trim()).length;
-  const headline = requirementForm.hiring_role
-    ? `Draft for ${requirementForm.hiring_role}`
-    : "Your hiring draft will appear here";
-
-  return (
-    <aside className="employer-matters-card employer-quick-draft-card">
-      <div className="employer-matters-head">
-        <div className="employer-matters-head-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 20h16" />
-            <path d="M7 17V8" />
-            <path d="M12 17V4" />
-            <path d="M17 17v-6" />
-          </svg>
-        </div>
-        <div>
-          <h3>{headline}</h3>
-          <p>
-            {employerName ? `${employerName}, ` : ""}
-            {companyName || businessType || "your business"} can keep this light. We only need enough detail to start hiring fast.
-          </p>
-        </div>
-      </div>
-
-      <div className="employer-quality-meter employer-quick-draft-meter">
-        <div className="employer-quality-meter-top">
-          <span>Draft progress</span>
-          <strong>{completedItems}/5</strong>
-        </div>
-        <div className="employer-quality-bar">
-          <div className="employer-quality-fill" style={{ width: `${(completedItems / snapshotItems.length) * 100}%` }} />
-        </div>
-        <div className="employer-quality-meter-note">
-          {readyToReview ? "Enough detail to move ahead" : "Answer a few short questions to finish the draft"}
-        </div>
-      </div>
-
-      <div className="employer-summary-grid employer-summary-grid-compact">
-        {snapshotItems.map(([label, value]) => (
-          <div className="employer-summary-item" key={label}>
-            <span>{label}</span>
-            <strong>{value || "Waiting..."}</strong>
-          </div>
-        ))}
-      </div>
-
-      <div className="employer-branding-actions employer-quick-draft-actions">
-        <button className="employer-plain-action employer-small-action" onClick={onEditDetails} type="button">
-          {showEditDetails ? "Hide details form" : "Edit full details"}
-        </button>
-        <button className="employer-support-button employer-quick-review-button" onClick={onReviewDraft} type="button">
-          Review draft
-        </button>
       </div>
     </aside>
   );
@@ -899,11 +769,6 @@ function EmployerProfileStep({
 }
 
 function EmployerRequirementStep({ form, setForm, authUserId, fieldErrors, setFieldErrors, setError, setMessage }) {
-  const completionPercent = useMemo(() => {
-    const completed = requirementFields.filter((field) => String(form[field] ?? "").trim()).length;
-    return Math.round((completed / requirementFields.length) * 100);
-  }, [form]);
-
   function updateField(key, value) {
     setError("");
     setMessage("");
@@ -1145,8 +1010,6 @@ function EmployerRequirementStep({ form, setForm, authUserId, fieldErrors, setFi
             </label>
           </section>
         </div>
-
-        <RequirementHelperCard completionPercent={completionPercent} />
       </div>
     </>
   );
@@ -1845,37 +1708,6 @@ export default function App() {
               tip="Keep it simple. Name, business type, role, area, urgency, shift, and pay are enough to get started."
               readyToReview={agentReadyToReview}
             />
-            <div className="employer-content-grid employer-chat-grid">
-              <QuickHiringDraftCard
-                businessType={profileForm.business_type}
-                companyName={profileForm.company_name}
-                employerName={profileForm.primary_contact_name}
-                onEditDetails={() => setShowRequirementEditor((current) => !current)}
-                onReviewDraft={() => {
-                  if (saveRequirementDraft()) {
-                    setActiveTab("review");
-                  } else {
-                    setShowRequirementEditor(true);
-                  }
-                }}
-                readyToReview={agentReadyToReview}
-                requirementForm={requirementForm}
-                showEditDetails={showRequirementEditor}
-              />
-              <RequirementHelperCard
-                completionPercent={Math.round(
-                  ([
-                    requirementForm.hiring_role,
-                    requirementForm.location,
-                    requirementForm.joining_timeline,
-                    requirementForm.compensation,
-                    requirementForm.openings,
-                  ].filter(Boolean).length /
-                    5) *
-                    100,
-                )}
-              />
-            </div>
             {showRequirementEditor ? (
               <EmployerRequirementStep
                 authUserId={session.user.id}
