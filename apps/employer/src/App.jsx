@@ -72,6 +72,10 @@ function getRequirementAgentStorageKey(authUserId) {
   return `turant_hire_employer_requirement_agent_${authUserId}`;
 }
 
+function getEmployerBasicsDismissedKey(authUserId) {
+  return `turant_hire_employer_basics_dismissed_${authUserId}`;
+}
+
 function getEmployerIntroMessage(profileForm) {
   if (!profileForm.primary_contact_name.trim()) {
     return "Hi, I’m here to help you hire fast. What should I call you?";
@@ -492,6 +496,71 @@ function ReviewHelperCard() {
         </div>
       </div>
     </aside>
+  );
+}
+
+function EmployerWelcomeBasicsCard({ form, onChange, onContinue, onSkip }) {
+  return (
+    <section className="employer-form-card employer-welcome-card">
+      <div className="employer-form-card-head">
+        <div className="employer-form-card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 20h9" />
+            <path d="M12 4h9" />
+            <path d="M4 9h16" />
+            <path d="M4 15h16" />
+          </svg>
+        </div>
+        <div className="employer-form-card-title">Optional business basics</div>
+      </div>
+
+      <div className="employer-page-heading employer-welcome-copy">
+        <h1>Set up the basics in under a minute</h1>
+        <p>
+          This is optional. If you share a few details now, we can personalize the hiring chat and reduce back-and-forth later.
+        </p>
+      </div>
+
+      <div className="employer-form-grid">
+        <label>
+          <span className="employer-label-text">Your name</span>
+          <input onChange={(event) => onChange("primary_contact_name", event.target.value)} value={form.primary_contact_name} />
+        </label>
+        <label>
+          <span className="employer-label-text">Business name</span>
+          <input onChange={(event) => onChange("company_name", event.target.value)} value={form.company_name} />
+        </label>
+        <label>
+          <span className="employer-label-text">Business type</span>
+          <input
+            onChange={(event) => onChange("business_type", event.target.value)}
+            placeholder="Cafe, bakery, restaurant, retail shop..."
+            value={form.business_type}
+          />
+        </label>
+        <label>
+          <span className="employer-label-text">Primary location</span>
+          <input
+            onChange={(event) => onChange("locations", event.target.value)}
+            placeholder="Bandra West, Jaipur, Koramangala..."
+            value={form.locations}
+          />
+        </label>
+        <label>
+          <span className="employer-label-text">Phone number</span>
+          <input onChange={(event) => onChange("primary_contact_phone", event.target.value)} value={form.primary_contact_phone} />
+        </label>
+      </div>
+
+      <div className="employer-branding-actions employer-welcome-actions">
+        <button className="employer-plain-action" onClick={onSkip} type="button">
+          Skip for now
+        </button>
+        <button className="employer-primary-action" onClick={onContinue} type="button">
+          Save and continue
+        </button>
+      </div>
+    </section>
   );
 }
 
@@ -1165,6 +1234,7 @@ export default function App() {
   const [isChecking, setIsChecking] = useState(true);
   const [isSessionResolved, setIsSessionResolved] = useState(false);
   const [hasHydratedEmployerState, setHasHydratedEmployerState] = useState(false);
+  const [showEmployerBasicsCard, setShowEmployerBasicsCard] = useState(false);
   const [error, setError] = useState("");
   const [hasRoleAccess, setHasRoleAccess] = useState(false);
   const [message, setMessage] = useState("");
@@ -1289,6 +1359,7 @@ export default function App() {
   useEffect(() => {
     if (!session?.user?.id || !hasRoleAccess) {
       setHasHydratedEmployerState(false);
+      setShowEmployerBasicsCard(false);
       setAgentMessages([
         {
           role: "assistant",
@@ -1301,6 +1372,8 @@ export default function App() {
     }
 
     try {
+      const basicsDismissed =
+        window.localStorage.getItem(getEmployerBasicsDismissedKey(session.user.id)) === "true";
       const savedProfile = window.localStorage.getItem(getProfileStorageKey(session.user.id));
       let hydratedProfile = null;
       if (savedProfile) {
@@ -1311,6 +1384,20 @@ export default function App() {
           primary_contact_email: hydratedProfile.primary_contact_email || current.primary_contact_email || session.user.email || "",
         }));
       }
+      const profileSnapshot = {
+        ...profileForm,
+        ...(hydratedProfile || {}),
+        primary_contact_email:
+          hydratedProfile?.primary_contact_email || profileForm.primary_contact_email || session.user.email || "",
+      };
+      const hasAnyBasics = Boolean(
+        profileSnapshot.primary_contact_name.trim() ||
+          profileSnapshot.company_name.trim() ||
+          profileSnapshot.business_type.trim() ||
+          profileSnapshot.locations.trim() ||
+          profileSnapshot.primary_contact_phone.trim(),
+      );
+      setShowEmployerBasicsCard(!basicsDismissed && !hasAnyBasics);
 
       const savedRequirement = window.localStorage.getItem(getRequirementStorageKey(session.user.id));
       if (savedRequirement) {
@@ -1338,18 +1425,14 @@ export default function App() {
         setAgentMessages([
           {
             role: "assistant",
-            content: getEmployerIntroMessage({
-              ...profileForm,
-              ...(hydratedProfile || {}),
-              primary_contact_email:
-                hydratedProfile?.primary_contact_email || profileForm.primary_contact_email || session.user.email || "",
-            }),
+            content: getEmployerIntroMessage(profileSnapshot),
           },
         ]);
         setAgentMissingFields([]);
         setAgentReadyToReview(false);
       }
     } catch {
+      setShowEmployerBasicsCard(true);
       setAgentMessages([
         {
           role: "assistant",
@@ -1418,6 +1501,34 @@ export default function App() {
   function handleBellClick() {
     setMessage("Notifications will appear here as soon as evaluations and candidate updates are available.");
     setError("");
+  }
+
+  function updateEmployerBasicsField(key, value) {
+    setProfileForm((current) => ({ ...current, [key]: value }));
+    setMessage("");
+    setError("");
+  }
+
+  function dismissEmployerBasicsCard(nextMessage) {
+    if (!session?.user?.id) {
+      return;
+    }
+
+    window.localStorage.setItem(getEmployerBasicsDismissedKey(session.user.id), "true");
+    setShowEmployerBasicsCard(false);
+    setMessage(nextMessage);
+    setError("");
+    setAgentMessages((current) => {
+      if (current.length > 1) {
+        return current;
+      }
+      return [
+        {
+          role: "assistant",
+          content: getEmployerIntroMessage(profileForm),
+        },
+      ];
+    });
   }
 
   function handlePhotoPick(ref) {
@@ -1548,17 +1659,28 @@ export default function App() {
     return true;
   }
 
+  function saveEmployerBasicsAndContinue() {
+    if (!session?.user?.id) {
+      return;
+    }
+
+    window.localStorage.setItem(getProfileStorageKey(session.user.id), JSON.stringify(profileForm));
+    dismissEmployerBasicsCard("Business basics saved. Now tell me who you need to hire.");
+  }
+
   function clearSavedEmployerState() {
     if (!session?.user?.id) {
       return;
     }
 
+    window.localStorage.removeItem(getEmployerBasicsDismissedKey(session.user.id));
     window.localStorage.removeItem(getProfileStorageKey(session.user.id));
     window.localStorage.removeItem(getRequirementStorageKey(session.user.id));
     window.localStorage.removeItem(getRequirementAgentStorageKey(session.user.id));
 
     setProfileFieldErrors({});
     setRequirementFieldErrors({});
+    setShowEmployerBasicsCard(true);
     setShowRequirementEditor(false);
     setProfileForm((current) => ({
       ...current,
@@ -1755,6 +1877,14 @@ export default function App() {
 
         {activeTab === "requirements" ? (
           <>
+            {showEmployerBasicsCard ? (
+              <EmployerWelcomeBasicsCard
+                form={profileForm}
+                onChange={updateEmployerBasicsField}
+                onContinue={saveEmployerBasicsAndContinue}
+                onSkip={() => dismissEmployerBasicsCard("No problem. You can add business basics later if needed.")}
+              />
+            ) : null}
             <EmployerRequirementAgent
               actionLabel="Continue"
               heading="Tell me who you need to hire"
